@@ -16,6 +16,8 @@ export type Result = {
   method: CountMethod
   /** Count reported by automatic detection, if any. */
   detectedScore?: number
+  /** Detected strum times in seconds after "go" (Mic mode). */
+  onsets?: number[]
 }
 
 export interface HistoryRepository {

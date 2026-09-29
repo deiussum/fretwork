@@ -22,6 +22,11 @@ export function SessionScreen({ engine, state }: { engine: SessionEngine; state:
       <p className="big-number" aria-live="off">
         {display}
       </p>
+      {state.count !== undefined && (
+        <p className="live-count" data-testid="live-count">
+          <span className="live-count-number">{state.count}</span> {state.count === 1 ? 'strum' : 'strums'}
+        </p>
+      )}
       <p className="hint">
         {state.kind === 'countIn' ? 'Get ready… ' : ''}
         <kbd>Esc</kbd> to stop

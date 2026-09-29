@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { CHORDS, formatPair, isValidPair, pairKey, type Chord } from '../domain/chords'
 import { pairStats, type Result } from '../domain/history'
 
@@ -7,10 +8,15 @@ type Props = {
   onChange: (first: Chord, second: Chord) => void
   onStart: () => void
   results: Result[]
+  /** Counting mode and input setup. */
+  children?: ReactNode
+  /** Why starting is blocked, if it is (e.g. the audio input was lost). */
+  blockedReason?: string
 }
 
-export function SetupScreen({ first, second, onChange, onStart, results }: Props) {
+export function SetupScreen({ first, second, onChange, onStart, results, children, blockedReason }: Props) {
   const valid = isValidPair(first, second)
+  const canStart = valid && !blockedReason
   const stats = valid ? pairStats(results, pairKey(first, second)) : {}
 
   return (
@@ -41,11 +47,17 @@ export function SetupScreen({ first, second, onChange, onStart, results }: Props
         </p>
       )}
 
-      <button className="primary" disabled={!valid} onClick={onStart}>
+      {children}
+
+      <button className="primary" disabled={!canStart} onClick={onStart}>
         Start {valid && formatPair([first, second])}
       </button>
       <p className="hint">
-        Press <kbd>Space</kbd> to start
+        {blockedReason ?? (
+          <>
+            Press <kbd>Space</kbd> to start
+          </>
+        )}
       </p>
     </section>
   )

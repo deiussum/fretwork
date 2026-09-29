@@ -60,12 +60,13 @@ A sample's time is `currentTime + i / sampleRate`. The worklet node has no outpu
 ### 4. Detector: spectral flux with an adaptive threshold
 
 - **Frames:** 1024-sample window (Hann), hop of about 5 ms. Sizes are derived from the sample rate, since config is in seconds.
-- **Feature:** log-compressed magnitude spectrum, 80 Hz–8 kHz. The onset strength is the half-wave-rectified sum of bin increases from the previous frame (spectral flux).
-- **Threshold:** a running median of the flux over the last ~0.5 s, plus a margin controlled by sensitivity (0–1 mapped to a margin range tuned on fixtures), plus an absolute floor so silence never triggers.
+- **Feature:** log-compressed magnitude spectrum, 80 Hz–8 kHz, computed as `log(1 + γ·|X|)` with a large γ (1e5). A large γ makes the compression close to a pure log, so a strum's flux barely depends on how loudly it's played. With γ = 1e3, strums 6–12 dB quieter than their neighbours were missed on synthetic tests. The onset strength is the half-wave-rectified sum of bin increases from the previous frame (spectral flux).
+- **Threshold:** a running median of the flux over the last ~0.5 s, plus a margin, plus a quiet-signal floor so silence never triggers. Sensitivity (0–1) controls both: the margin goes from 0.26 down to 0.08 and the floor from −56 dBFS down to −75 dBFS as sensitivity rises. The middle of the slider (0.5, the default) is a margin of 0.17 and a floor of about −65 dBFS. These were tuned on the recorded fixtures (see *Tuning on real recordings* below) so the default is the recommended setting.
 - **Peak picking:** a local maximum above the threshold, with about 15 ms of look-ahead.
 - **Refractory period:** 250 ms. Onsets within 250 ms of the last accepted one are dropped.
-- **Timestamp:** the start of the frame where the flux began rising. With a ~5 ms hop, this fits the 20 ms precision requirement.
-- **Detection latency:** window plus look-ahead is about 40 ms, well within the 100 ms live-count budget.
+- **Broadband check:** a strum sets every string ringing at once, so most of the spectrum jumps. Finger noise while changing chords (fingers landing like a hammer-on, strings released, squeaks) changes only a narrow slice. A candidate counts only if at least 30% of the 80 Hz–8 kHz bins rose by 6 dB or more, comparing the spectrum 60 ms before the candidate with the spectrum 30 ms after it. The 30 ms matters: a thumb strum sweeps across the strings more slowly than a pick, so measuring sooner (15 ms) rejected real thumb strums.
+- **Timestamp:** the centre of the analysis window of the peak frame, on the audio clock. On synthetic strums this is within about 5 ms of the true onset.
+- **Detection latency:** window plus the 30 ms decision delay is about 50 ms, within the 100 ms live-count budget.
 
 Why this approach: spectral flux holds up when a ringing chord masks the energy rise of the next strum (the mic case), and it's cheap enough for the audio thread.
 
@@ -135,6 +136,14 @@ The results key is renamed from `guitar.oneMinuteChanges.v1` to `fretwork.oneMin
 - **Fixture accuracy tests:** `fixtures/strums/manifest.json` lists `{ wav, labels, kind: 'pickup' | 'mic' }`. The test decodes each WAV, runs the detector at default sensitivity, matches detections to labels within ±50 ms (greedy nearest), and asserts the spec's recall and precision thresholds for that kind.
 - **Fixture size:** clips are trimmed to about 20–30 s (roughly 2–3 MB each at 48 kHz mono 16-bit) and committed to plain git. No LFS unless the fixture set grows.
 
+### Tuning on real recordings
+
+Two 60 s recordings of an acoustic through the XLR mic (A↔D, one strummed with a pick, one with the thumb) were labelled by hand and added as fixtures. What they showed:
+
+- Every false detection in the pick run fell 0.25–0.45 s *before* a strum: noise from the fretting hand while changing chords, not the pick. Those events were narrowband (6–65% of bins rising, versus 86–100% for real strums), which led to the broadband check.
+- Thumb strums have a softer attack. At the original default, only 36% of them were found; they need a lower margin, which the broadband check makes safe.
+- Results at the new defaults: pick 98% recall / 98% precision (57/57 counted), thumb 96% / 98% (52/53 counted). Across the slider, pick stays at 57 and thumb ranges from 47 (0.2) to 55 (1.0), peaking at 53/53 around 0.65.
+
 ## Risks / Trade-offs
 
 - **[Linux/PipeWire channel exposure varies]** An interface might appear as two mono devices or one 2-channel device. → Support both with device and channel pickers, and test on the user's VOLT 2 setup early.
@@ -142,8 +151,6 @@ The results key is renamed from `guitar.oneMinuteChanges.v1` to `fretwork.oneMin
 - **[Default sensitivity doesn't suit all setups]** → The sensitivity control plus the strum indicator lets players tune it. Defaults come from fixtures of both kinds.
 - **[Input latency is not compensated]** Timestamps sit slightly after the true strum. → Constant offset, no effect on counts or intervals. Documented.
 - **[Test data depends on the user]** Accuracy tests need real labelled recordings. → Synthetic tests carry development until the fixtures exist. The fixture tasks are explicitly assigned to the user.
+- **[Timestamp precision not verified on real audio]** The fixture labels were corrected from detector drafts rather than placed independently, so they confirm counts but can't confirm the 20 ms timing requirement. At higher sensitivity, some pick strums are timestamped 30–40 ms earlier than at lower sensitivity (the first pick contact rather than the loudest point). → Counts and intervals are unaffected. Timing is verified on synthetic audio, and hand-placed labels can be added later if timing analysis needs it.
+- **[Only mic fixtures so far]** No pickup or DI recordings yet. → Add paired pickup fixtures when convenient. The pickup signal is cleaner, so it's expected to be easier.
 - **[Memory while recording]** 64 s at 48 kHz as Float32 is about 12 MB. → Acceptable. Only one recording is kept, and it's discarded on the next start.
-
-## Open Questions
-
-- The exact default sensitivity and the margin range. They will be tuned on fixtures, and that tuning changes no specs or tasks.

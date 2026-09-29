@@ -319,3 +319,161 @@ kbd {
     display: none;
   }
 }
+
+/* Counting mode and input setup */
+.counting {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  max-width: 520px;
+}
+
+.mode-toggle {
+  display: inline-flex;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.mode-toggle button {
+  border: none;
+  border-radius: 0;
+  padding: 0.4rem 1.25rem;
+}
+
+.mode-toggle button[aria-checked='true'] {
+  background: var(--accent);
+  color: var(--accent-text);
+  font-weight: 600;
+}
+
+.input-setup {
+  display: grid;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  text-align: left;
+}
+
+.field {
+  display: grid;
+  grid-template-columns: 6.5rem 1fr auto;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--muted);
+}
+
+.field select,
+.field input[type='range'] {
+  grid-column: 2 / 4;
+  width: 100%;
+  font: inherit;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.25rem 0.4rem;
+}
+
+.field input[type='range'] {
+  padding: 0;
+  accent-color: var(--accent);
+}
+
+.level-meter {
+  position: relative;
+  height: 12px;
+  border-radius: 6px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.level-rms {
+  height: 100%;
+  background: var(--good);
+  transition: width 40ms linear;
+}
+
+.level-peak {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--text);
+}
+
+.strum-indicator {
+  position: relative;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.strum-flash {
+  position: absolute;
+  inset: 0;
+  background: var(--accent);
+  animation: strum-flash 250ms ease-out forwards;
+}
+
+@keyframes strum-flash {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.advanced summary {
+  cursor: pointer;
+  color: var(--muted);
+}
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.notice-inline {
+  margin: 0;
+  color: var(--warn);
+}
+
+.activate {
+  justify-self: start;
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* Live count during the run */
+.live-count {
+  margin: 0;
+  font-size: clamp(1.5rem, 6vh, 3.5rem);
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.live-count-number {
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Recording downloads */
+.downloads {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}

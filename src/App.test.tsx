@@ -5,23 +5,25 @@ import App from './App'
 import { FakeClock } from './engine/clock'
 import { SessionEngine } from './engine/session'
 import { RecordingSounds } from './engine/sounds'
+import { fakeInput, type FakeInputOptions } from './test/fakeInput'
 import { MemoryHistory } from './test/memoryHistory'
 
-function setup() {
+function setup(inputOptions: FakeInputOptions = {}) {
   const clock = new FakeClock()
   const history = new MemoryHistory()
   const engine = new SessionEngine({ clock, sounds: new RecordingSounds(), history })
+  const fake = fakeInput(inputOptions)
   const advance = async (seconds: number) => {
     clock.advance(seconds)
     await act(async () => {
       vi.advanceTimersByTime(seconds * 1000)
     })
   }
-  return { clock, history, engine, advance }
+  return { clock, history, engine, advance, ...fake }
 }
 
 async function renderApp(ctx: ReturnType<typeof setup>) {
-  render(<App engine={ctx.engine} history={ctx.history} />)
+  render(<App engine={ctx.engine} history={ctx.history} input={ctx.input} />)
   await act(async () => {}) // let the last pair / results load
 }
 
@@ -74,7 +76,7 @@ test('invalid score shows a message; a valid score shows the result', async () =
   await press(' ', 'Space')
   await ctx.advance(0.15 + 4 + 60)
 
-  const input = screen.getByLabelText('How many changes?')
+  const input = screen.getByLabelText('How many strums?')
   expect(document.activeElement).toBe(input)
   fireEvent.change(input, { target: { value: 'abc' } })
   await act(async () => {
@@ -106,5 +108,5 @@ test('shows a notice when storage is unavailable', async () => {
   const ctx = setup()
   ctx.history.available = false
   await renderApp(ctx)
-  expect(screen.getByRole('status').textContent).toMatch(/won't be saved/)
+  expect(screen.getByText(/won't be saved/)).toBeTruthy()
 })

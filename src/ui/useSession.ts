@@ -9,8 +9,14 @@ export function useSession(engine: SessionEngine): SessionState {
 /**
  * The single global keyboard handler: Space starts (setup/result), Escape
  * aborts or goes back. Enter while confirming is handled by the score form.
+ * `start` is undefined when starting isn't currently allowed.
  */
-export function useSessionKeys(engine: SessionEngine, state: SessionState, selectedPair: ChordPair | undefined) {
+export function useSessionKeys(
+  engine: SessionEngine,
+  state: SessionState,
+  selectedPair: ChordPair | undefined,
+  start: ((pair: ChordPair) => void) | undefined,
+) {
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.repeat) return
@@ -19,7 +25,7 @@ export function useSessionKeys(engine: SessionEngine, state: SessionState, selec
         case 'idle':
           if (isSpace) {
             e.preventDefault()
-            if (selectedPair) void engine.start(selectedPair)
+            if (selectedPair && start) start(selectedPair)
           }
           break
         case 'countIn':
@@ -33,7 +39,7 @@ export function useSessionKeys(engine: SessionEngine, state: SessionState, selec
         case 'result':
           if (isSpace) {
             e.preventDefault()
-            void engine.start(state.pair)
+            if (start) start(state.pair)
           }
           if (e.key === 'Escape') engine.back()
           break
@@ -41,7 +47,7 @@ export function useSessionKeys(engine: SessionEngine, state: SessionState, selec
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [engine, state, selectedPair])
+  }, [engine, state, selectedPair, start])
 }
 
 /**
