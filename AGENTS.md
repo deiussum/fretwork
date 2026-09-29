@@ -56,3 +56,7 @@ Work is planned in `openspec/`. Behaviour contracts live in `openspec/specs/<cap
 - When implementing a change, follow its `tasks.md` and tick each `- [ ]` as it's completed.
 - If implementation diverges from the specs or design, update the artifacts rather than silently narrowing scope.
 - `openspec validate <change> --strict` must pass.
+
+## Commits
+
+Use [Conventional Commits](https://www.conventionalcommits.org/): `type(scope): subject`, e.g. `feat(engine): add onset detector`, `fix(ui): keep pair after abort`, `chore(openspec): archive <change>`. Common types: `feat`, `fix`, `refactor`, `test`, `docs`, `chore`. Scopes typically match the top-level areas above (`engine`, `domain`, `ui`, `openspec`).
