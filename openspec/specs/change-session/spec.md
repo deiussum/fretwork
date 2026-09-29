@@ -29,11 +29,19 @@ The system SHALL play a count-in of 4 evenly spaced clicks, one second apart, be
 - **THEN** the interval between consecutive sounds deviates by no more than 5 ms from 1 second, even while the UI is busy rendering
 
 ### Requirement: Timed run with visual countdown
-The system SHALL run for exactly 60 seconds after the "go" sound. It SHALL display the remaining time as whole seconds, in a size readable from about 2 metres on a desktop monitor, together with the current chord pair.
+The system SHALL run for exactly 60 seconds after the "go" sound. It SHALL display the remaining time as whole seconds, in a size readable from about 2 metres on a desktop monitor, together with the current chord pair. In Mic mode it SHALL also display the live strum count, updated within 100 ms of each detected strum.
 
 #### Scenario: Countdown display
 - **WHEN** 13.4 seconds of the run have elapsed
 - **THEN** the display shows 0:47 and the current pair
+
+#### Scenario: Live count in Mic mode
+- **WHEN** 23 strums have been detected during a Mic mode run
+- **THEN** the run screen shows a count of 23 alongside the countdown
+
+#### Scenario: No count in Manual mode
+- **WHEN** a Manual mode run is in progress
+- **THEN** no strum count is shown
 
 ### Requirement: End signal
 The system SHALL play a distinct end sound, different from the count-in click and the "go" sound, exactly when the 60-second run ends. It SHALL then move to score confirmation.
@@ -54,7 +62,7 @@ The system SHALL let the player abort during the count-in or the run. An aborted
 - **THEN** the remaining clicks and the "go" sound do not play and the setup screen is shown
 
 ### Requirement: Score confirmation
-After a run ends, the system SHALL show a score entry that accepts a whole number from 0 to 999, with the input focused so the player can type immediately. Enter SHALL save a valid score. Escape SHALL discard the attempt without saving. The score entry SHALL support being prefilled with a suggested value, which the player can edit before confirming.
+After a run ends, the system SHALL show a score entry that accepts a whole number from 0 to 999, with the input focused so the player can type immediately. Enter SHALL save a valid score. Escape SHALL discard the attempt without saving. The score entry SHALL support being prefilled with a suggested value, which the player can edit before confirming. In Mic mode the entry SHALL be prefilled with the detected strum count. In both modes the screen SHALL state that the score is the number of strums played.
 
 #### Scenario: Enter a valid score
 - **WHEN** the run has ended and the player types 34 and presses Enter
@@ -71,6 +79,14 @@ After a run ends, the system SHALL show a score entry that accepts a whole numbe
 #### Scenario: Prefilled suggestion
 - **WHEN** a suggested value of 36 is supplied to score confirmation
 - **THEN** the input shows 36, the player can change it to 34, and Enter saves 34
+
+#### Scenario: Mic mode prefill
+- **WHEN** a Mic mode run ends with 34 detected strums
+- **THEN** the score entry shows 34, selected so typing replaces it, and Enter saves 34
+
+#### Scenario: Counting rule shown
+- **WHEN** the score entry is shown in either mode
+- **THEN** the screen explains that the score is the number of strums played
 
 ### Requirement: Result screen
 After a score is saved, the system SHALL show the score, the previous score and personal best for the pair from before this attempt, and whether this attempt is a new personal best. From the result screen, Space SHALL start another session with the same pair and Escape SHALL return to setup.
@@ -89,3 +105,14 @@ The system SHALL start its audio from the player's first start action, so that b
 #### Scenario: First session after page load
 - **WHEN** the page has just loaded and the player presses Space to start
 - **THEN** the first count-in click is audible
+
+### Requirement: Counting mode
+The setup screen SHALL let the player choose between Manual and Mic counting. On first launch the mode SHALL be Manual. Mic mode SHALL be selectable only when an audio input is open.
+
+#### Scenario: First launch
+- **WHEN** the player opens the app for the first time
+- **THEN** Manual counting is selected
+
+#### Scenario: Mic mode session
+- **WHEN** Mic mode is selected with an open input and the player presses Space
+- **THEN** the session runs with automatic strum counting
