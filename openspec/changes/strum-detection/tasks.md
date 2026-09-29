@@ -52,5 +52,5 @@
 
 ## 9. End-to-end check
 
-- [ ] 9.1 **(User)** Full manual run with the VOLT 2 in Mic mode, on pickup and on the XLR mic: the live count tracks strums, the prefilled score is within ±1 of a careful manual count, count-in strums are ignored, the end result is saved with method `mic`, and after a reload the mode and input settings are remembered. Also confirm that the input is never heard through the speakers. Record any issues as follow-up tasks.
-- [ ] 9.2 Verify that `npm test`, `npm run lint`, `npm run build` and `openspec validate strum-detection --strict` all pass.
+- [x] 9.1 **(User)** Full manual run with the VOLT 2 in Mic mode, on pickup and on the XLR mic: the live count tracks strums, the prefilled score is within ±1 of a careful manual count, count-in strums are ignored, the end result is saved with method `mic`, and after a reload the mode and input settings are remembered. Also confirm that the input is never heard through the speakers. Record any issues as follow-up tasks.
+- [x] 9.2 Verify that `npm test`, `npm run lint`, `npm run build` and `openspec validate strum-detection --strict` all pass.
