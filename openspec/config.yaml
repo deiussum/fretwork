@@ -1,0 +1,48 @@
+schema: spec-driven
+
+context: |
+  Guitar practice web app. Initial tool: "1 minute changes" (alternate between two
+  chords for 60s, count changes, track progress per chord pair). Long-term goal:
+  automatic change counting via microphone/audio-interface strum (onset) detection,
+  usable by other people with arbitrary input devices (DI interfaces or built-in mics).
+  Future: additional practice tools may be added alongside.
+  Tech stack: React + TypeScript, built with Vite, tested with Vitest. Runs locally in
+  the browser; desktop is the primary target initially, but UI should be readable from
+  playing distance and keyboard-driven (hands are on the guitar).
+  Conventions:
+  - Timing- and audio-critical logic lives in framework-free TypeScript (session engine),
+    not in React components. AudioContext.currentTime is the single clock; sounds are
+    scheduled ahead on the audio timeline, UI reads the clock per animation frame.
+  - React components render engine state and forward user commands only.
+  - Persistence is local to the browser (no backend).
+
+# Project context (optional)
+# This is shown to AI when creating artifacts.
+# Add your tech stack, conventions, style guides, domain knowledge, etc.
+# Example:
+#   context: |
+#     Tech stack: TypeScript, React, Node.js
+#     We use conventional commits
+#     Domain: e-commerce platform
+
+# Per-artifact rules (optional)
+# Add custom rules for specific artifacts.
+# Example:
+#   rules:
+#     proposal:
+#       - Keep proposals under 500 words
+#       - Always include a "Non-goals" section
+#     tasks:
+#       - Break tasks into chunks of max 2 hours
+
+# Per-operation guidance (optional)
+# Add advisory guidance for how apply and archive work should be conducted.
+# This is separate from artifact rules above.
+# Example:
+#   operations:
+#     apply:
+#       guidance:
+#         - Keep test summaries concise
+#     archive:
+#       guidance:
+#         - Summarize the archive outcome before finishing
