@@ -1,4 +1,4 @@
-import type { Clock } from './clock'
+import type { SharedAudioContext } from './audioContext'
 
 export type SoundKind = 'click' | 'go' | 'end'
 
@@ -28,26 +28,21 @@ const SOUNDS: Record<SoundKind, { tones: Tone[]; gain: number }> = {
   },
 }
 
-/**
- * Synthesised sounds on a lazily created AudioContext. Also acts as the
- * session clock, since sounds must be scheduled against `currentTime`.
- */
-export class WebAudioSounds implements SoundScheduler, Clock {
-  private ctx: AudioContext | undefined
+/** Synthesised sounds on the shared AudioContext. */
+export class WebAudioSounds implements SoundScheduler {
   private readonly active = new Set<OscillatorNode>()
+  private readonly audio: SharedAudioContext
 
-  now(): number {
-    return this.ctx?.currentTime ?? 0
+  constructor(audio: SharedAudioContext) {
+    this.audio = audio
   }
 
   async resume(): Promise<void> {
-    this.ctx ??= new AudioContext()
-    // Some browsers suspend an idle context, so resume on every start.
-    if (this.ctx.state !== 'running') await this.ctx.resume()
+    await this.audio.resume()
   }
 
   schedule(kind: SoundKind, at: number): void {
-    const ctx = this.ctx
+    const ctx = this.audio.current
     if (!ctx) throw new Error('resume() must be called before scheduling sounds')
     const { tones, gain } = SOUNDS[kind]
     for (const tone of tones) {

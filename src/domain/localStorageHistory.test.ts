@@ -77,3 +77,12 @@ describe('LocalStorageHistory', () => {
     expect(storage.getItem(STORAGE_KEY)).toBe('not json')
   })
 })
+
+test('history saved before strum detection (no onsets field) still loads', async () => {
+  const storage = new MemoryStorage()
+  const legacy = { version: 1, results: [sample], lastPair: ['A', 'D'] }
+  storage.setItem(STORAGE_KEY, JSON.stringify(legacy))
+  const repo = new LocalStorageHistory(storage)
+  expect(repo.available).toBe(true)
+  expect(await repo.loadResults()).toEqual([sample])
+})

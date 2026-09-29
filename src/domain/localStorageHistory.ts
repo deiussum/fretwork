@@ -1,7 +1,7 @@
 import type { ChordPair } from './chords'
 import type { HistoryRepository, Result } from './history'
 
-export const STORAGE_KEY = 'guitar.oneMinuteChanges.v1'
+export const STORAGE_KEY = 'fretwork.oneMinuteChanges.v1'
 
 type StoredData = {
   version: 1

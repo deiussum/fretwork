@@ -1,9 +1,11 @@
 import { formatPair } from '../domain/chords'
+import type { InputRecorder } from '../engine/input/inputRecorder'
 import type { SessionState } from '../engine/session'
+import { RecordingDownloads } from './RecordingDownloads'
 
 type ResultState = Extract<SessionState, { kind: 'result' }>
 
-export function ResultScreen({ state }: { state: ResultState }) {
+export function ResultScreen({ state, recorder }: { state: ResultState; recorder?: InputRecorder }) {
   const firstTime = state.best === undefined
 
   return (
@@ -23,6 +25,7 @@ export function ResultScreen({ state }: { state: ResultState }) {
           <dd>{state.previous ?? '—'}</dd>
         </div>
       </dl>
+      {state.recorded && recorder && <RecordingDownloads recorder={recorder} pair={state.pair} />}
       <p className="hint">
         <kbd>Space</kbd> to go again · <kbd>Esc</kbd> to change chords
       </p>
