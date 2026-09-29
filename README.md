@@ -10,3 +10,7 @@ npm run dev     # start the dev server
 npm test        # run unit tests
 npm run build   # type-check and build
 ```
+
+## License
+
+[MIT](LICENSE)
