@@ -4,7 +4,7 @@ Guidance for AI coding agents working in this repository.
 
 ## Project
 
-A browser-based guitar practice app. The first tool is **1 minute changes**: pick two chords, hear a count-in, alternate between them for 60 seconds, then log the number of changes. Results are tracked per chord pair. The planned next feature is automatic change counting via strum (onset) detection from a microphone or audio interface.
+Fretwork is a browser-based guitar practice app. The first tool is **1 minute changes**: pick two chords, hear a count-in, alternate between them for 60 seconds, then log the number of changes. Results are tracked per chord pair. The planned next feature is automatic change counting via strum (onset) detection from a microphone or audio interface.
 
 Stack: React + TypeScript (strict), Vite, Vitest (+ jsdom and Testing Library for UI tests), oxlint. No backend. Persistence is browser `localStorage`.
 

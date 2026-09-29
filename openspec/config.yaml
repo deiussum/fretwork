@@ -1,7 +1,7 @@
 schema: spec-driven
 
 context: |
-  Guitar practice web app. Initial tool: "1 minute changes" (alternate between two
+  Fretwork: guitar practice web app. Initial tool: "1 minute changes" (alternate between two
   chords for 60s, count changes, track progress per chord pair). Long-term goal:
   automatic change counting via microphone/audio-interface strum (onset) detection,
   usable by other people with arbitrary input devices (DI interfaces or built-in mics).
