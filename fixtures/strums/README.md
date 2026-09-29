@@ -12,7 +12,7 @@ Labelled recordings that the strum detector is measured against (`npm test` runs
    ```
    Recordings exported from the app itself (Mic mode → Advanced → Record sessions) also work. They start at the first count-in click, so trim the first 4.15 s off (the count-in plus the 0.15 s after "go" that the app ignores) to match what the app counts.
 4. **Correct.** In Audacity, import the labels (File → Import → Labels…) next to the audio. Move, delete or add labels until there's exactly one at the start of every real strum. Then export them back over the same file (File → Export → Export Labels…).
-5. **Register.** Add both tracks to `manifest.json`, sharing the same labels:
+5. **Register.** Add both tracks to `manifest.json`. They can share one label file. If the mic hears some strums noticeably later than the pickup (more than about 40 ms), give the mic its own copy with those labels moved, as `cg-take1-mic.labels.txt` does:
    ```json
    [
      { "wav": "ad-take1-pickup.wav", "labels": "ad-take1.labels.txt", "kind": "pickup" },

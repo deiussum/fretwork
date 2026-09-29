@@ -35,6 +35,14 @@ export type DetectorConfig = {
   broadbandSpanSec: number
   /** …with the spectrum this long after it (a slow thumb strum takes a while to reach every string). */
   broadbandAfterSec: number
+  /**
+   * Over the same span, energy above `energyMinFreq` must rise by at least
+   * this much. A strum always brings fresh high-frequency content (ringing
+   * strings lose it quickly); fretting a new chord while strings ring (loud
+   * on piezo pickups) only moves energy between frequencies. 0 disables.
+   */
+  minEnergyRiseDb: number
+  energyMinFreq: number
 }
 
 export const DEFAULT_DETECTOR_CONFIG: DetectorConfig = {
@@ -54,6 +62,8 @@ export const DEFAULT_DETECTOR_CONFIG: DetectorConfig = {
   broadbandRise: Math.LN2, // 6 dB in log-magnitude units
   broadbandSpanSec: 0.06,
   broadbandAfterSec: 0.03,
+  minEnergyRiseDb: 4,
+  energyMinFreq: 2000,
 }
 
 /**
@@ -84,6 +94,7 @@ export class OnsetDetector {
   private readonly decisionDelay: number
   private readonly firstBin: number
   private readonly lastBin: number
+  private readonly energyFirstBin: number
   private readonly lookahead: number
   private readonly history: Float64Array
   private readonly sorted: Float64Array
@@ -109,6 +120,7 @@ export class OnsetDetector {
     const binHz = sampleRate / this.windowSize
     this.firstBin = Math.max(1, Math.floor(this.config.minFreq / binHz))
     this.lastBin = Math.min(this.windowSize / 2, Math.ceil(this.config.maxFreq / binHz))
+    this.energyFirstBin = Math.min(this.lastBin, Math.max(this.firstBin, Math.floor(this.config.energyMinFreq / binHz)))
     this.lookahead = Math.max(1, Math.round(this.config.lookaheadSec / this.config.hopSec))
     this.broadbandSpan = Math.max(1, Math.round(this.config.broadbandSpanSec / this.config.hopSec))
     this.broadbandAfter = Math.max(1, Math.round(this.config.broadbandAfterSec / this.config.hopSec))
@@ -223,17 +235,26 @@ export class OnsetDetector {
    * `broadbandSpan` before it: did most of the spectrum rise?
    */
   private isBroadband(candidateFrame: number): boolean {
-    const { minBroadband, broadbandRise } = this.config
-    if (minBroadband <= 0) return true
+    const { minBroadband, broadbandRise, minEnergyRiseDb } = this.config
+    if (minBroadband <= 0 && minEnergyRiseDb <= 0) return true
     const beforeFrame = candidateFrame - this.broadbandSpan
     if (beforeFrame < 0) return true
     const after = this.spectrum(candidateFrame + this.broadbandAfter)
     const before = this.spectrum(beforeFrame)
     let rising = 0
+    let energyAfter = 0
+    let energyBefore = 0
     for (let k = this.firstBin; k <= this.lastBin; k++) {
       if (after[k] - before[k] > broadbandRise) rising++
+      if (k >= this.energyFirstBin) {
+        // Undo the log compression to compare linear power.
+        energyAfter += Math.expm1(after[k]) ** 2
+        energyBefore += Math.expm1(before[k]) ** 2
+      }
     }
-    return rising / (this.lastBin - this.firstBin + 1) >= minBroadband
+    const broadEnough = minBroadband <= 0 || rising / (this.lastBin - this.firstBin + 1) >= minBroadband
+    const riseDb = 10 * Math.log10((energyAfter + 1e-20) / (energyBefore + 1e-20))
+    return broadEnough && (minEnergyRiseDb <= 0 || riseDb >= minEnergyRiseDb)
   }
 
   private floorDb(): number {

@@ -39,16 +39,16 @@
 ## 7. UI
 
 - [x] 7.1 Add a counting-mode toggle (Manual / Mic) on the setup screen, wired to InputController. Show a message for denied or unavailable. Verify with a jsdom test that selecting Mic calls the controller, and that the denied state shows the message and stays on Manual.
-- [ ] 7.2 Add an input panel in Mic mode: device select, channel select (hidden for mono), level meter, strum indicator flash, sensitivity slider, notice for a missing saved device, and an Advanced section with a "Record sessions" toggle. Verify manually in Chrome with the VOLT 2 (both inputs), and with a jsdom test that the channel select is hidden for 1-channel inputs.
-- [ ] 7.3 Pass the onset source to `engine.start` in Mic mode. Show the live count on the run screen in Mic mode only, readable at about 2 m. Verify with a jsdom test (count shown in Mic mode, absent in Manual) and manually by strumming.
+- [x] 7.2 Add an input panel in Mic mode: device select, channel select (hidden for mono), level meter, strum indicator flash, sensitivity slider, notice for a missing saved device, and an Advanced section with a "Record sessions" toggle. Verify manually in Chrome with the VOLT 2 (both inputs), and with a jsdom test that the channel select is hidden for 1-channel inputs.
+- [x] 7.3 Pass the onset source to `engine.start` in Mic mode. Show the live count on the run screen in Mic mode only, readable at about 2 m. Verify with a jsdom test (count shown in Mic mode, absent in Manual) and manually by strumming.
 - [x] 7.4 On the confirm screen: prefill the detected count with the text selected, show the counting-rule hint in both modes, and show the input-lost message. Verify with jsdom tests for the prefill and selection, the hint in both modes, and input lost.
-- [ ] 7.5 Add WAV and label download buttons on the confirm and result screens when a recording exists, with the file naming from the spec. Verify manually by exporting, opening in Audacity, and importing the labels. They should line up with the strums.
+- [x] 7.5 Add WAV and label download buttons on the confirm and result screens when a recording exists, with the file naming from the spec. Verify manually by exporting, opening in Audacity, and importing the labels. They should line up with the strums.
 
 ## 8. Fixtures and accuracy (needs the user's recordings)
 
-- [ ] 8.1 **(User)** Record paired fixtures: the acoustic via pickup and via XLR mic at the same time in Audacity, at least 2 takes of about 20–30 s on different chord pairs. Label the pickup track using `npm run detect` plus hand correction, then export the WAVs and labels into `fixtures/strums/`. Verify that the files exist and the labels line up in Audacity.
+- [x] 8.1 **(User)** Record paired fixtures: the acoustic via pickup and via XLR mic at the same time in Audacity, at least 2 takes of about 20–30 s on different chord pairs. Label the pickup track using `npm run detect` plus hand correction, then export the WAVs and labels into `fixtures/strums/`. Verify that the files exist and the labels line up in Audacity.
 - [x] 8.2 Add `fixtures/strums/manifest.json` and the accuracy test (±50 ms greedy matching, recall and precision per kind). Verify that the test runs in `npm test` and reports per-fixture recall and precision.
-- [ ] 8.3 Tune the default sensitivity, margin range and absolute floor until all fixtures meet the spec thresholds (pickup ≥ 95%, mic ≥ 90%). Verify that the accuracy tests pass and synthetic tests still pass. Record the chosen defaults in design.md.
+- [x] 8.3 Tune the default sensitivity, margin range and absolute floor until all fixtures meet the spec thresholds (pickup ≥ 95%, mic ≥ 90%). Verify that the accuracy tests pass and synthetic tests still pass. Record the chosen defaults in design.md.
 
 ## 9. End-to-end check
 

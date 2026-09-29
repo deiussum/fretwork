@@ -1,4 +1,26 @@
 [
-  { "wav": "ad-mic-pick.wav", "labels": "ad-mic-pick.labels.txt", "kind": "mic", "note": "Acoustic via XLR mic, A-D changes, strummed with a pick" },
-  { "wav": "ad-mic-thumb.wav", "labels": "ad-mic-thumb.labels.txt", "kind": "mic", "note": "Acoustic via XLR mic, A-D changes, strummed with the thumb" }
+  {
+    "wav": "ad-mic-pick.wav",
+    "labels": "ad-mic-pick.labels.txt",
+    "kind": "mic",
+    "note": "Acoustic via XLR mic, A-D changes, strummed with a pick"
+  },
+  {
+    "wav": "ad-mic-thumb.wav",
+    "labels": "ad-mic-thumb.labels.txt",
+    "kind": "mic",
+    "note": "Acoustic via XLR mic, A-D changes, strummed with the thumb"
+  },
+  {
+    "wav": "cg-take1-pickup.wav",
+    "labels": "cg-take1-pickup.labels.txt",
+    "kind": "pickup",
+    "note": "Acoustic piezo pickup, C-G changes, same performance as the mic take below (44.1 kHz). Hand-labelled; trimmed to start 1.5 s in, just before the first strum."
+  },
+  {
+    "wav": "cg-take1-mic.wav",
+    "labels": "cg-take1-mic.labels.txt",
+    "kind": "mic",
+    "note": "Acoustic via XLR mic, same performance as the pickup take above. Same 12 strums as the pickup labels, timed from the mic (the mic hears some strums 20-50 ms later)."
+  }
 ]
