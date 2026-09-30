@@ -83,3 +83,8 @@ export function summarizeByPair(results: readonly Result[]): PairSummary[] {
     })
     .sort((a, b) => b.lastAt.localeCompare(a.lastAt))
 }
+
+/** Every chord name used in results, each once, in order of first appearance. */
+export function chordsInResults(results: readonly Result[]): Chord[] {
+  return [...new Set(results.flatMap((r) => r.chords))]
+}

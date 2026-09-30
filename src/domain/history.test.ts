@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest'
-import { pairStats, summarizeByPair, type Result } from './history'
+import { chordsInResults, pairStats, summarizeByPair, type Result } from './history'
 
 function result(pairKey: string, score: number, at: string): Result {
   const [a, b] = pairKey.split('|')
@@ -41,5 +41,16 @@ describe('summarizeByPair', () => {
     expect(first).toMatchObject({ pairKey: 'A|D', best: 34, latest: 31, attempts: 3, lastAt: '2026-09-04T10:00:00Z' })
     expect(first.results.map((r) => r.score)).toEqual([31, 34, 28])
     expect(second).toMatchObject({ pairKey: 'C|G', best: 40, latest: 40, attempts: 1 })
+  })
+})
+
+describe('chordsInResults', () => {
+  test('lists each chord once across pairs', () => {
+    const results = [
+      result('D/F#|G', 20, '2026-09-01T10:00:00Z'),
+      result('C|G', 30, '2026-09-02T10:00:00Z'),
+      result('D/F#|G', 25, '2026-09-03T10:00:00Z'),
+    ]
+    expect(chordsInResults(results)).toEqual(['D/F#', 'G', 'C'])
   })
 })
