@@ -1,10 +1,4 @@
-# chord-pair-selection Specification
-
-## Purpose
-
-Lets the player choose which two chords to practise changing between in a "1 minute changes" session. Pairs are identified consistently so results can be tracked per pair.
-
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: Built-in chord list
 The system SHALL provide a built-in list of common chords, offered as suggestions for both chord slots. The list SHALL contain at least: A, Am, A7, Asus2, Asus4, B, Bm, B7, C, Cadd9, C7, D, Dm, D7, Dsus2, Dsus4, E, Em, Em7, E7, F, Fmaj7, G, G/B, G7. The built-in list SHALL NOT limit which chords can be selected (see "Custom chord names").
@@ -17,30 +11,7 @@ The system SHALL provide a built-in list of common chords, offered as suggestion
 - **WHEN** the player types "Ds" into a chord slot
 - **THEN** Dsus2 and Dsus4 are among the suggestions offered
 
-### Requirement: Select two distinct chords
-The system SHALL require exactly two different chords to be selected before a session can start.
-
-#### Scenario: Valid pair selected
-- **WHEN** the player selects A for the first chord and D for the second chord
-- **THEN** the pair A↔D is shown as the current pair and starting a session is enabled
-
-#### Scenario: Same chord selected twice
-- **WHEN** the player selects the same chord for both slots
-- **THEN** starting a session is disabled and the player is told the chords must differ
-
-### Requirement: Pairs are unordered
-The system SHALL treat a chord pair as unordered, so that X↔Y and Y↔X identify the same pair for history and personal bests.
-
-#### Scenario: Reversed selection matches existing pair
-- **WHEN** the player has results for A↔D and then selects D first and A second
-- **THEN** the system shows the personal best and history for A↔D
-
-### Requirement: Remember last pair
-The system SHALL preselect the most recently practised pair when the app is opened.
-
-#### Scenario: Reopen app
-- **WHEN** the player last practised C↔G and reopens the app
-- **THEN** C↔G is preselected as the current pair
+## ADDED Requirements
 
 ### Requirement: Custom chord names
 The system SHALL let the player enter any chord name into either chord slot by typing it, including names not in the built-in list. A custom chord SHALL be treated like a built-in chord for sessions, history and personal bests.

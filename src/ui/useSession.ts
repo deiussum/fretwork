@@ -10,6 +10,7 @@ export function useSession(engine: SessionEngine): SessionState {
  * The single global keyboard handler: Space starts (setup/result), Escape
  * aborts or goes back. Enter while confirming is handled by the score form.
  * `start` is undefined when starting isn't currently allowed.
+ * Space typed into a text field is left to the field.
  */
 export function useSessionKeys(
   engine: SessionEngine,
@@ -21,6 +22,9 @@ export function useSessionKeys(
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.repeat) return
       const isSpace = e.code === 'Space' || e.key === ' '
+      // Let a space be typed into text fields. Other keys still apply, e.g.
+      // Escape from the score input discards the attempt.
+      if (isSpace && isTextEntry(e.target)) return
       switch (state.kind) {
         case 'idle':
           if (isSpace) {
@@ -72,4 +76,11 @@ export function useClockValue<T>(engine: SessionEngine, active: boolean, read: (
     return () => cancelAnimationFrame(frame)
   }, [engine, active])
   return value
+}
+
+const NON_TEXT_INPUTS = new Set(['button', 'checkbox', 'color', 'file', 'image', 'radio', 'range', 'reset', 'submit'])
+
+function isTextEntry(target: EventTarget | null): boolean {
+  if (target instanceof HTMLTextAreaElement) return true
+  return target instanceof HTMLInputElement && !NON_TEXT_INPUTS.has(target.type)
 }

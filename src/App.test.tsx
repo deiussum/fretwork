@@ -66,8 +66,84 @@ test('the last practised pair is preselected', async () => {
   const ctx = setup()
   ctx.history.lastPair = ['C', 'G']
   await renderApp(ctx)
-  expect(screen.getByLabelText<HTMLSelectElement>('First chord').value).toBe('C')
-  expect(screen.getByLabelText<HTMLSelectElement>('Second chord').value).toBe('G')
+  expect(screen.getByLabelText<HTMLInputElement>('First chord').value).toBe('C')
+  expect(screen.getByLabelText<HTMLInputElement>('Second chord').value).toBe('G')
+})
+
+test('a custom chord can be typed into either slot', async () => {
+  const ctx = setup()
+  await renderApp(ctx)
+  fireEvent.change(screen.getByLabelText('First chord'), { target: { value: 'D/F#' } })
+  fireEvent.change(screen.getByLabelText('Second chord'), { target: { value: ' G ' } })
+  const button = screen.getByRole('button', { name: /start/i })
+  expect(button.textContent).toBe('Start D/F# ↔ G')
+  expect(button).toHaveProperty('disabled', false)
+})
+
+test('invalid chord names warn and block starting', async () => {
+  const ctx = setup()
+  await renderApp(ctx)
+  const first = screen.getByLabelText('First chord')
+  const cases: [string, RegExp][] = [
+    ['', /Enter a chord/],
+    ['A|B', /can't contain \|/],
+    ['F#m7b5/E12345', /at most 12 characters/],
+  ]
+  for (const [value, message] of cases) {
+    fireEvent.change(first, { target: { value } })
+    expect(screen.getByRole('alert').textContent).toMatch(message)
+    expect(screen.getByRole('button', { name: /start/i })).toHaveProperty('disabled', true)
+  }
+})
+
+test('chords from saved results are suggested once', async () => {
+  const ctx = setup()
+  ctx.history.results = [
+    { id: '1', pairKey: 'D/F#|G', chords: ['D/F#', 'G'], score: 20, durationSec: 60, at: '2026-09-01T10:00:00Z', method: 'manual' },
+  ]
+  await renderApp(ctx)
+  const options = [...document.querySelectorAll('datalist option')].map((o) => o.getAttribute('value'))
+  expect(options.filter((v) => v === 'D/F#')).toHaveLength(1)
+  expect(options.filter((v) => v === 'G')).toHaveLength(1)
+})
+
+test('Space typed into a chord field does not start a session', async () => {
+  const ctx = setup()
+  const start = vi.spyOn(ctx.engine, 'start')
+  await renderApp(ctx)
+  const first = screen.getByLabelText('First chord')
+  first.focus()
+  await act(async () => {
+    fireEvent.keyDown(first, { key: ' ', code: 'Space' })
+  })
+  expect(start).not.toHaveBeenCalled()
+})
+
+test('Enter leaves the chord field so Space starts the session', async () => {
+  const ctx = setup()
+  await renderApp(ctx)
+  const first = screen.getByLabelText('First chord')
+  first.focus()
+  fireEvent.change(first, { target: { value: 'Amadd9' } })
+  await act(async () => {
+    fireEvent.keyDown(first, { key: 'Enter', code: 'Enter' })
+  })
+  expect(document.activeElement).not.toBe(first)
+  await press(' ', 'Space')
+  expect(ctx.engine.getState().kind).toBe('countIn')
+})
+
+test('Escape in the score entry discards the attempt', async () => {
+  const ctx = setup()
+  await renderApp(ctx)
+  await press(' ', 'Space')
+  await ctx.advance(0.15 + 4 + 60)
+  const input = screen.getByLabelText('How many strums?')
+  await act(async () => {
+    fireEvent.keyDown(input, { key: 'Escape', code: 'Escape' })
+  })
+  expect(ctx.engine.getState().kind).toBe('idle')
+  expect(ctx.history.results).toHaveLength(0)
 })
 
 test('invalid score shows a message; a valid score shows the result', async () => {
@@ -101,7 +177,7 @@ test('Escape during the run returns to setup with the pair kept', async () => {
   await ctx.advance(10)
   await press('Escape')
   expect(ctx.engine.getState().kind).toBe('idle')
-  expect(screen.getByLabelText<HTMLSelectElement>('First chord').value).toBe('C')
+  expect(screen.getByLabelText<HTMLInputElement>('First chord').value).toBe('C')
 })
 
 test('shows a notice when storage is unavailable', async () => {
