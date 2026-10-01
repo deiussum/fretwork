@@ -61,6 +61,11 @@ self: {
         assert "application/json" in h, h
         assert "cache-control: no-cache" in h, h
 
+    with subtest("the manifest is served as a web app manifest"):
+        h = headers("/manifest.webmanifest")
+        assert "content-type: application/manifest+json" in h, h
+        assert "frame-ancestors 'none'" in h, h
+
     with subtest("no access log entries by default"):
         machine.succeed("test ! -s /var/log/nginx/access.log")
 

@@ -49,6 +49,8 @@ expect_header "$asset" "immutable"
 expect_header / "cache-control: no-cache"
 expect_header /config.json "cache-control: no-cache"
 expect_header /config.json "content-type: application/json"
+expect_header /manifest.webmanifest "content-type: application/manifest+json"
+expect_header /manifest.webmanifest "frame-ancestors 'none'"
 
 config=$(curl -sf "$base/config.json" | json)
 expected=$(echo '{"logRetention": "up to \"7\" days", "operatorContact": "mailto:admin@example.com"}' | json)
