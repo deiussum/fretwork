@@ -38,34 +38,60 @@ The container runs as a non-root user on port 8080. It only writes to `/tmp`, so
 
 ### NixOS
 
-The flake provides a NixOS module that serves Fretwork through the system nginx:
+The flake provides a NixOS module that serves Fretwork through the system nginx. In your system's `flake.nix`:
+1. Add Fretwork as an input, pinned to a release.
+2. Pass `inputs` to your modules with `specialArgs`.
 
 ```nix
 {
-  inputs.fretwork.url = "github:deiussum/fretwork";
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    fretwork = {
+      url = "github:deiussum/fretwork/v0.2.0";
+      inputs.nixpkgs.follows = "nixpkgs"; # build with your nixpkgs, not a second copy
+    };
+  };
 
-  outputs = { nixpkgs, fretwork, ... }: {
+  outputs = { nixpkgs, ... }@inputs: {
     nixosConfigurations.myhost = nixpkgs.lib.nixosSystem {
-      modules = [
-        fretwork.nixosModules.default
-        {
-          services.fretwork = {
-            enable = true;
-            hostName = "fretwork.example.com";
-            logRetention = "up to 7 days";
-            operatorContact = "mailto:you@example.com"; # optional
-            # accessLog = true;                         # off by default
-          };
-          # Add TLS on the same virtual host, or terminate it in a proxy:
-          # services.nginx.virtualHosts."fretwork.example.com" = { forceSSL = true; enableACME = true; };
-        }
-      ];
+      system = "x86_64-linux";
+      specialArgs = { inherit inputs; }; # lets imported modules take `inputs`
+      modules = [ ./configuration.nix ];
     };
   };
 }
 ```
 
-To update, run `nix flake update fretwork`. To pin a release, use `github:deiussum/fretwork/v0.2.0`. To build the static files alone, run `nix build github:deiussum/fretwork`; the site is in `result/share/fretwork/www`.
+Then enable it from any module, for example a `fretwork.nix` imported by `configuration.nix`:
+
+```nix
+{ inputs, ... }:
+
+{
+  imports = [ inputs.fretwork.nixosModules.default ];
+
+  services.fretwork = {
+    enable = true;
+    hostName = "fretwork.example.com";
+    logRetention = "up to 7 days";
+    operatorContact = "mailto:you@example.com"; # optional
+    # accessLog = true;                         # off by default
+  };
+
+  # Add TLS on the same virtual host, or terminate it in a proxy in front:
+  # services.nginx.virtualHosts."fretwork.example.com" = { forceSSL = true; enableACME = true; };
+}
+```
+
+| Option | Default | Meaning |
+|---|---|---|
+| `hostName` | (required) | Name of the nginx virtual host. Requests must arrive with this `Host` header, so a proxy in front must pass it through. |
+| `logRetention` | `null` | How long access logs are kept by whatever serves this instance, shown on the privacy page. If `null`, the page says it isn't stated. |
+| `operatorContact` | `null` | Optional contact for the privacy page. `https://` and `mailto:` values become links. |
+| `accessLog` | `false` | Whether nginx keeps access logs for this virtual host. |
+| `package` | the flake's package | The Fretwork build to serve. |
+
+To upgrade, change the tag in the input URL, then run `nix flake update fretwork` and `nixos-rebuild switch`. Rolling back is changing the tag back. To build the static files alone, run `nix build github:deiussum/fretwork`; the site is in `result/share/fretwork/www`.
 
 ## Development
 
