@@ -659,3 +659,80 @@ kbd {
   font-weight: 700;
   color: var(--muted);
 }
+
+/* Footer */
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  width: 100%;
+  max-width: 960px;
+  margin-top: 1.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+button.link {
+  border: none;
+  background: none;
+  padding: 0;
+  color: var(--muted);
+  text-decoration: underline;
+  font-size: inherit;
+}
+
+button.link:hover:not(:disabled) {
+  color: var(--accent);
+}
+
+button.link:disabled {
+  opacity: 1;
+  cursor: default;
+  text-decoration: none;
+}
+
+.version {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Privacy */
+.privacy {
+  max-width: 680px;
+  align-items: stretch;
+  text-align: left;
+  gap: 0.75rem;
+}
+
+.privacy h1 {
+  text-align: center;
+}
+
+.privacy h2 {
+  margin: 0.75rem 0 0;
+  font-size: 1.2rem;
+}
+
+.privacy p,
+.privacy ul {
+  margin: 0;
+}
+
+.privacy .lead {
+  font-size: 1.1rem;
+}
+
+.privacy a {
+  color: var(--accent);
+}
+
+.privacy .primary {
+  align-self: center;
+  margin-top: 0.75rem;
+}
+
+.privacy .hint {
+  text-align: center;
+}
