@@ -62,8 +62,16 @@ if docker logs "$name" 2>&1 | grep -q '"GET /'; then fail "access log written wi
 echo "== access log on"
 start -e FRETWORK_ACCESS_LOG=on
 curl -sf "$base/" >/dev/null
-sleep 0.5
-docker logs "$name" 2>&1 | grep -q '"GET / ' || fail "no access log with FRETWORK_ACCESS_LOG=on"
+# Docker may take a moment to collect the container's output: wait up to 5 s.
+logged=false
+for _ in $(seq 1 25); do
+  if docker logs "$name" 2>&1 | grep -q '"GET / '; then
+    logged=true
+    break
+  fi
+  sleep 0.2
+done
+$logged || fail "no access log with FRETWORK_ACCESS_LOG=on"
 
 echo "== nothing configured"
 start
