@@ -59,6 +59,12 @@ Work is planned in `openspec/`. Behaviour contracts live in `openspec/specs/<cap
 - `openspec validate <change> --strict` must pass.
 - Archive the change (syncing its specs) before opening a PR, so the PR includes the archived change and the updated specs. The exception is a draft PR opened for early review before the change is ready for final review. Archive before marking it ready.
 
+## Branches and releases
+
+- `develop` is where work happens; `main` always holds the latest release and is the default branch.
+- Branch from `develop` and open pull requests against `develop` (`gh pr create --base develop`). They are squash-merged.
+- Releasing: bump `package.json` in a PR to `develop`, then merge `develop` into `main` with a merge commit or fast-forward (never squash), then tag that commit on `main` `v<version>`. The release workflow refuses tags not on `main`.
+
 ## Commits
 
 Use [Conventional Commits](https://www.conventionalcommits.org/): `type(scope): subject`, e.g. `feat(engine): add onset detector`, `fix(ui): keep pair after abort`, `chore(openspec): archive <change>`. Common types: `feat`, `fix`, `refactor`, `test`, `docs`, `chore`. Scopes typically match the top-level areas above (`engine`, `domain`, `ui`, `openspec`).

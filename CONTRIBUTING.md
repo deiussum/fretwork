@@ -50,7 +50,10 @@ Use [Conventional Commits](https://www.conventionalcommits.org/): `type(scope): 
 
 ## Pull requests
 
-`main` is protected, so all changes go through a pull request from a branch.
+Work happens on `develop`. `main` always holds the latest release.
+
+- Branch from `develop`, and open your pull request **against `develop`**. GitHub suggests `main` by default, so change the base branch.
+- Both branches are protected, so every change goes through a pull request.
 
 Before opening a PR:
 
@@ -59,18 +62,19 @@ Before opening a PR:
 
   The exception is a **draft PR** opened for early feedback before the change is ready for final review. Archive it before marking the PR ready.
 
-In the PR description, say what changed and how you tested it, including any manual or in-browser checks. PRs are squash-merged, so the PR title becomes the commit message. Write it as a Conventional Commit too.
+In the PR description, say what changed and how you tested it, including any manual or in-browser checks. PRs into `develop` are squash-merged, so the PR title becomes the commit message. Write it as a Conventional Commit too.
 
 ## Releases
 
 The version in `package.json` is shown in the app's footer, together with the commit it was built from. For each release:
 
-1. Bump the version in `package.json`. While it is 0.x, raise the minor version for new features and the patch version for fixes.
-2. After the bump is merged, tag the release commit `v0.x.y` and push the tag.
+1. On `develop`, bump the version in `package.json` with a normal pull request. While it is 0.x, raise the minor version for new features and the patch version for fixes.
+2. Open a pull request from `develop` into `main`, and merge it with a **merge commit** or as a fast-forward, **never a squash**. A squashed release commit isn't in `develop`'s history, so the branches would drift apart and later release PRs would show old changes again.
+3. Tag the resulting commit on `main` as `v0.x.y` and push the tag.
 
-Pushing the tag runs the release workflow. It checks that the tag matches `package.json` and publishes the container image to `ghcr.io/deiussum/fretwork` as `<version>`, `<major>.<minor>` and `latest`.
+Pushing the tag runs the release workflow. It checks that the tagged commit is on `main` and that the tag matches `package.json`, then publishes the container image to `ghcr.io/deiussum/fretwork` as `<version>`, `<major>.<minor>` and `latest`.
 
-CI runs on every pull request: tests, lint and build, `nix flake check` (which builds the package and runs the NixOS module's VM test), and a smoke test of the container image (`deploy/smoke-test.sh`).
+CI runs on every pull request and on pushes to `develop` and `main`: tests, lint and build, `nix flake check` (which builds the package and runs the NixOS module's VM test), and a smoke test of the container image (`deploy/smoke-test.sh`).
 
 ## License
 
