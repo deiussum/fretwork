@@ -8,13 +8,15 @@ type Props = {
   onChange: (first: Chord, second: Chord) => void
   onStart: () => void
   results: Result[]
+  /** Instructions shown under the title. */
+  intro?: ReactNode
   /** Counting mode and input setup. */
   children?: ReactNode
   /** Why starting is blocked, if it is (e.g. the audio input was lost). */
   blockedReason?: string
 }
 
-export function SetupScreen({ first, second, onChange, onStart, results, children, blockedReason }: Props) {
+export function SetupScreen({ first, second, onChange, onStart, results, intro, children, blockedReason }: Props) {
   const error = pairError(first, second)
   const valid = error === undefined
   const canStart = valid && !blockedReason
@@ -25,6 +27,7 @@ export function SetupScreen({ first, second, onChange, onStart, results, childre
   return (
     <section className="screen setup">
       <h1>1 Minute Changes</h1>
+      {intro}
       <div className="pair-picker">
         <ChordInput label="First chord" value={first} listId={suggestionsId} onChange={(c) => onChange(c, second)} />
         <span className="pair-arrow" aria-hidden>

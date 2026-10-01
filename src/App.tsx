@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState, type MouseEvent } from 'react'
 import type { HistoryRepository } from './domain/history'
 import type { OperatorConfig } from './domain/operatorConfig'
+import type { UiPrefsRepository } from './domain/uiPrefs'
 import type { InputController } from './engine/input/audioInput'
 import type { InputRecorder } from './engine/input/inputRecorder'
 import type { MetronomeEngine } from './engine/metronome/metronome'
@@ -19,6 +20,7 @@ type Props = {
   metronome: MetronomeEngine
   /** The operator's hosting details, loading in the background; see operatorConfig.ts. */
   operatorConfig?: Promise<OperatorConfig>
+  uiPrefs?: UiPrefsRepository
 }
 
 type Tool = 'changes' | 'metronome'
@@ -29,7 +31,7 @@ const TOOLS: { id: Tool; label: string }[] = [
 ]
 
 /** App shell: switches between practice tools and shows the footer and privacy page. */
-export default function App({ engine, history, input, recorder, metronome, operatorConfig }: Props) {
+export default function App({ engine, history, input, recorder, metronome, operatorConfig, uiPrefs }: Props) {
   const [tool, setTool] = useState<Tool>('changes')
   const [showPrivacy, setShowPrivacy] = useState(false)
   const closePrivacy = useCallback(() => setShowPrivacy(false), [])
@@ -74,6 +76,7 @@ export default function App({ engine, history, input, recorder, metronome, opera
         recorder={recorder}
         active={tool === 'changes' && !showPrivacy}
         homeRequest={homeRequest}
+        uiPrefs={uiPrefs}
       />
       {tool === 'metronome' && !showPrivacy && (
         <main>
