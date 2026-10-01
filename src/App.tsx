@@ -1,5 +1,6 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import type { HistoryRepository } from './domain/history'
+import type { OperatorConfig } from './domain/operatorConfig'
 import type { InputController } from './engine/input/audioInput'
 import type { InputRecorder } from './engine/input/inputRecorder'
 import type { MetronomeEngine } from './engine/metronome/metronome'
@@ -15,6 +16,8 @@ type Props = {
   input: InputController
   recorder?: InputRecorder
   metronome: MetronomeEngine
+  /** The operator's hosting details, loading in the background; see operatorConfig.ts. */
+  operatorConfig?: Promise<OperatorConfig>
 }
 
 type Tool = 'changes' | 'metronome'
@@ -25,10 +28,11 @@ const TOOLS: { id: Tool; label: string }[] = [
 ]
 
 /** App shell: switches between practice tools and shows the footer and privacy page. */
-export default function App({ engine, history, input, recorder, metronome }: Props) {
+export default function App({ engine, history, input, recorder, metronome, operatorConfig }: Props) {
   const [tool, setTool] = useState<Tool>('changes')
   const [showPrivacy, setShowPrivacy] = useState(false)
   const closePrivacy = useCallback(() => setShowPrivacy(false), [])
+  const operator = useOperatorConfig(operatorConfig)
   const session = useSession(engine)
   // No switching away from (or footer during) a session in progress.
   const showChrome = tool === 'metronome' || session.kind === 'idle'
@@ -59,7 +63,7 @@ export default function App({ engine, history, input, recorder, metronome }: Pro
       )}
       {showPrivacy && (
         <main>
-          <PrivacyView onClose={closePrivacy} />
+          <PrivacyView onClose={closePrivacy} operator={operator} />
         </main>
       )}
       {showChrome && (
@@ -72,4 +76,19 @@ export default function App({ engine, history, input, recorder, metronome }: Pro
       )}
     </div>
   )
+}
+
+/** The operator config once loaded; empty (nothing stated) until then. */
+function useOperatorConfig(source: Promise<OperatorConfig> | undefined): OperatorConfig {
+  const [config, setConfig] = useState<OperatorConfig>({})
+  useEffect(() => {
+    let current = true
+    void source?.then((loaded) => {
+      if (current) setConfig(loaded)
+    })
+    return () => {
+      current = false
+    }
+  }, [source])
+  return config
 }

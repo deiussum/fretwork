@@ -1,0 +1,9 @@
+.git
+node_modules
+dist
+result
+fixtures
+openspec
+.claude
+.opencode
+*.log

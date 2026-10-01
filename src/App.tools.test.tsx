@@ -10,13 +10,13 @@ import { IntervalTicker } from './engine/ticker'
 import { fakeInput } from './test/fakeInput'
 import { MemoryHistory } from './test/memoryHistory'
 
-async function renderApp() {
+async function renderApp(operatorConfig?: Promise<{ logRetention?: string }>) {
   const clock = new FakeClock()
   const history = new MemoryHistory()
   const engine = new SessionEngine({ clock, sounds: new RecordingSounds(), history })
   const metronome = new MetronomeEngine({ clock, sounds: new RecordingSounds(), ticker: new IntervalTicker() })
   const { input } = fakeInput()
-  render(<App engine={engine} history={history} input={input} metronome={metronome} />)
+  render(<App engine={engine} history={history} input={input} metronome={metronome} operatorConfig={operatorConfig} />)
   await act(async () => {})
   return { engine, metronome }
 }
@@ -135,4 +135,10 @@ test('Space on the privacy page starts nothing', async () => {
   expect(engine.getState().kind).toBe('idle')
   expect(metronome.getState().playing).toBe(false)
   expect(screen.getByRole('heading', { name: 'Privacy' })).toBeTruthy()
+})
+
+test('the privacy page shows the loaded operator config', async () => {
+  await renderApp(Promise.resolve({ logRetention: 'up to 7 days' }))
+  await choose('Privacy')
+  expect(screen.getByTestId('access-logs').textContent).toContain('kept for up to 7 days')
 })
