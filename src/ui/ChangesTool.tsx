@@ -21,13 +21,21 @@ type Props = {
   recorder?: InputRecorder
   /** False while another tool is shown: renders nothing and ignores keys, but keeps its state. */
   active: boolean
+  /** Changes each time the home link is used: show the setup screen again. */
+  homeRequest?: number
 }
 
 /** The "1 minute changes" tool: setup, session screens and history. */
-export function ChangesTool({ engine, history, input, recorder, active }: Props) {
+export function ChangesTool({ engine, history, input, recorder, active, homeRequest = 0 }: Props) {
   const state = useSession(engine)
   const [pair, setPair] = useState<[Chord, Chord]>(['A', 'D'])
   const [view, setView] = useState<'practice' | 'history'>('practice')
+  // Back to setup when the home link is used (state adjusted during render, not in an effect).
+  const [seenHomeRequest, setSeenHomeRequest] = useState(homeRequest)
+  if (homeRequest !== seenHomeRequest) {
+    setSeenHomeRequest(homeRequest)
+    setView('practice')
+  }
   const results = useResults(history, state.kind)
   const mode = useInputValue(input, (s) => s.mode)
   const inputStatus = useInputValue(input, (s) => s.status)

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState, type MouseEvent } from 'react'
 import type { HistoryRepository } from './domain/history'
 import type { OperatorConfig } from './domain/operatorConfig'
 import type { InputController } from './engine/input/audioInput'
@@ -6,6 +6,7 @@ import type { InputRecorder } from './engine/input/inputRecorder'
 import type { MetronomeEngine } from './engine/metronome/metronome'
 import type { SessionEngine } from './engine/session'
 import { ChangesTool } from './ui/ChangesTool'
+import { Logo, Wordmark } from './ui/Logo'
 import { MetronomeTool } from './ui/MetronomeTool'
 import { PrivacyView } from './ui/PrivacyView'
 import { useSession } from './ui/useSession'
@@ -34,19 +35,36 @@ export default function App({ engine, history, input, recorder, metronome, opera
   const closePrivacy = useCallback(() => setShowPrivacy(false), [])
   const operator = useOperatorConfig(operatorConfig)
   const session = useSession(engine)
-  // No switching away from (or footer during) a session in progress.
+  /** Bumped by the home link; tells 1 minute changes to show its setup screen. */
+  const [homeRequest, setHomeRequest] = useState(0)
+  // No switching away from (or header and footer during) a session in progress.
   const showChrome = tool === 'metronome' || session.kind === 'idle'
+
+  const goHome = (e: MouseEvent) => {
+    e.preventDefault()
+    setTool('changes')
+    setShowPrivacy(false)
+    setHomeRequest((n) => n + 1)
+  }
 
   return (
     <div className="app">
-      {showChrome && !showPrivacy && (
-        <nav className="tools" aria-label="Tools">
-          {TOOLS.map(({ id, label }) => (
-            <button key={id} aria-pressed={tool === id} onClick={() => setTool(id)}>
-              {label}
-            </button>
-          ))}
-        </nav>
+      {showChrome && (
+        <header className="site-header">
+          <a href="/" className="home" aria-label="Fretwork, home" onClick={goHome}>
+            <Logo />
+            <Wordmark />
+          </a>
+          {!showPrivacy && (
+            <nav className="tools" aria-label="Tools">
+              {TOOLS.map(({ id, label }) => (
+                <button key={id} aria-pressed={tool === id} onClick={() => setTool(id)}>
+                  {label}
+                </button>
+              ))}
+            </nav>
+          )}
+        </header>
       )}
       {/* Kept mounted so the chosen pair and view survive a visit to another tool or the privacy page. */}
       <ChangesTool
@@ -55,6 +73,7 @@ export default function App({ engine, history, input, recorder, metronome, opera
         input={input}
         recorder={recorder}
         active={tool === 'changes' && !showPrivacy}
+        homeRequest={homeRequest}
       />
       {tool === 'metronome' && !showPrivacy && (
         <main>
