@@ -28,6 +28,8 @@ export function useSessionKeys(
       // Let a space be typed into text fields. Other keys still apply, e.g.
       // Escape from the score input discards the attempt.
       if (isSpace && isTextEntry(e.target)) return
+      // Space on a focused <details> toggle opens or closes it instead.
+      if (isSpace && e.target instanceof Element && e.target.closest('summary')) return
       switch (state.kind) {
         case 'idle':
           if (isSpace) {

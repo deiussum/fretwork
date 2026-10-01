@@ -4,6 +4,7 @@ import App from './App.tsx'
 import { LocalStorageHistory } from './domain/localStorageHistory'
 import { LocalStorageMetronomeSettings } from './domain/metronomeSettings'
 import { loadOperatorConfig } from './domain/operatorConfig'
+import { LocalStorageUiPrefs } from './domain/uiPrefs'
 import { LocalStorageSettings } from './domain/settings'
 import { SharedAudioContext } from './engine/audioContext'
 import { InputController } from './engine/input/audioInput'
@@ -65,6 +66,6 @@ const operatorConfig = loadOperatorConfig()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App engine={engine} history={history} input={input} recorder={recorder} metronome={metronome} operatorConfig={operatorConfig} />
+    <App engine={engine} history={history} input={input} recorder={recorder} metronome={metronome} operatorConfig={operatorConfig} uiPrefs={new LocalStorageUiPrefs()} />
   </StrictMode>,
 )

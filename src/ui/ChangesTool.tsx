@@ -1,12 +1,14 @@
 import { useCallback, useEffect, useState } from 'react'
 import { isValidPair, type Chord, type ChordPair } from '../domain/chords'
 import type { HistoryRepository } from '../domain/history'
+import { DEFAULT_UI_PREFS, type UiPrefsRepository } from '../domain/uiPrefs'
 import type { InputController } from '../engine/input/audioInput'
 import type { InputRecorder } from '../engine/input/inputRecorder'
 import type { SessionEngine } from '../engine/session'
 import { ConfirmScreen } from './ConfirmScreen'
 import { CountingPanel } from './CountingPanel'
 import { HistoryView } from './HistoryView'
+import { HowItWorks } from './HowItWorks'
 import { ResultScreen } from './ResultScreen'
 import { SessionScreen } from './SessionScreen'
 import { SetupScreen } from './SetupScreen'
@@ -23,13 +25,20 @@ type Props = {
   active: boolean
   /** Changes each time the home link is used: show the setup screen again. */
   homeRequest?: number
+  /** Remembers whether "How it works" is open; without one it starts open. */
+  uiPrefs?: UiPrefsRepository
 }
 
 /** The "1 minute changes" tool: setup, session screens and history. */
-export function ChangesTool({ engine, history, input, recorder, active, homeRequest = 0 }: Props) {
+export function ChangesTool({ engine, history, input, recorder, active, homeRequest = 0, uiPrefs }: Props) {
   const state = useSession(engine)
   const [pair, setPair] = useState<[Chord, Chord]>(['A', 'D'])
   const [view, setView] = useState<'practice' | 'history'>('practice')
+  const [helpOpen, setHelpOpen] = useState(() => (uiPrefs?.load() ?? DEFAULT_UI_PREFS).changesHelpOpen)
+  const toggleHelp = (open: boolean) => {
+    setHelpOpen(open)
+    if (uiPrefs) uiPrefs.save({ ...uiPrefs.load(), changesHelpOpen: open })
+  }
   // Back to setup when the home link is used (state adjusted during render, not in an effect).
   const [seenHomeRequest, setSeenHomeRequest] = useState(homeRequest)
   if (homeRequest !== seenHomeRequest) {
@@ -86,6 +95,7 @@ export function ChangesTool({ engine, history, input, recorder, active, homeRequ
             onStart={() => start(pair)}
             results={results}
             blockedReason={blockedReason}
+            intro={<HowItWorks open={helpOpen} onToggle={toggleHelp} />}
           >
             <CountingPanel input={input} />
           </SetupScreen>
