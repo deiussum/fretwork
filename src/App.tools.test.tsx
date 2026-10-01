@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
+import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import App from './App'
 import { FakeClock } from './engine/clock'
@@ -7,6 +7,7 @@ import { MetronomeEngine } from './engine/metronome/metronome'
 import { SessionEngine } from './engine/session'
 import { RecordingSounds } from './engine/sounds'
 import { IntervalTicker } from './engine/ticker'
+import { PROJECT_URL } from './project'
 import { fakeInput } from './test/fakeInput'
 import { MemoryHistory } from './test/memoryHistory'
 
@@ -193,4 +194,27 @@ test('home from the privacy page shows setup', async () => {
   await goHome()
   expect(screen.getByRole('heading', { name: '1 Minute Changes' })).toBeTruthy()
   expect(screen.getByRole('navigation', { name: 'Tools' })).toBeTruthy()
+})
+
+const repoLink = () => screen.queryByRole('link', { name: 'GitHub' })
+
+test('the footer links to the project on setup and the metronome, not during a session', async () => {
+  await renderApp()
+  expect(repoLink()?.getAttribute('href')).toBe(PROJECT_URL)
+  expect(repoLink()?.getAttribute('target')).toBe('_blank')
+  expect(repoLink()?.getAttribute('rel')).toContain('noopener')
+  expect(repoLink()?.closest('footer')).toBeTruthy()
+  await choose('Metronome')
+  expect(repoLink()).toBeTruthy()
+  await choose('1 minute changes')
+  await press(' ', 'Space')
+  expect(repoLink()).toBeNull()
+})
+
+test("the footer link matches the privacy page's GitHub link", async () => {
+  await renderApp()
+  const footerHref = repoLink()?.getAttribute('href')
+  await choose('Privacy')
+  const privacyLink = within(screen.getByRole('main')).getByRole('link', { name: 'GitHub' })
+  expect(privacyLink.getAttribute('href')).toBe(footerHref)
 })

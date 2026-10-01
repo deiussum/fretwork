@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState, type MouseEvent } from 'react'
 import type { HistoryRepository } from './domain/history'
 import type { OperatorConfig } from './domain/operatorConfig'
 import type { UiPrefsRepository } from './domain/uiPrefs'
+import { PROJECT_URL } from './project'
 import type { InputController } from './engine/input/audioInput'
 import type { InputRecorder } from './engine/input/inputRecorder'
 import type { MetronomeEngine } from './engine/metronome/metronome'
@@ -93,6 +94,9 @@ export default function App({ engine, history, input, recorder, metronome, opera
           <button className="link" onClick={() => setShowPrivacy(true)} disabled={showPrivacy}>
             Privacy
           </button>
+          <a className="link" href={PROJECT_URL} target="_blank" rel="noopener noreferrer">
+            GitHub
+          </a>
           <span className="version">{__APP_VERSION__}</span>
         </footer>
       )}

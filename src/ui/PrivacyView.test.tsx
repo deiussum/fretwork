@@ -1,7 +1,8 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, expect, test, vi } from 'vitest'
-import { PRIVACY_UPDATED, PROJECT_URL, PrivacyView } from './PrivacyView'
+import { PROJECT_URL } from '../project'
+import { PRIVACY_UPDATED, PrivacyView } from './PrivacyView'
 
 afterEach(cleanup)
 
