@@ -714,7 +714,8 @@ kbd {
   font-size: 0.85rem;
 }
 
-button.link {
+button.link,
+a.link {
   border: none;
   background: none;
   padding: 0;
@@ -723,7 +724,8 @@ button.link {
   font-size: inherit;
 }
 
-button.link:hover:not(:disabled) {
+button.link:hover:not(:disabled),
+a.link:hover {
   color: var(--accent);
 }
 

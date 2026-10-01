@@ -1,10 +1,10 @@
 import { useEffect } from 'react'
 import type { OperatorConfig } from '../domain/operatorConfig'
+import { PROJECT_URL } from '../project'
 
 /** Update whenever the statement below changes. */
 export const PRIVACY_UPDATED = '2026-10-01'
 
-export const PROJECT_URL = 'https://github.com/deiussum/fretwork'
 
 const updatedFormat = new Intl.DateTimeFormat(undefined, { dateStyle: 'long', timeZone: 'UTC' })
 
