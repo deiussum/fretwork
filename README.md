@@ -1,3 +1,5 @@
+<img src="public/favicon.svg" alt="" width="72" height="72">
+
 # Fretwork
 
 Browser-based guitar practice tools, driven from the keyboard so your hands can stay on the guitar.

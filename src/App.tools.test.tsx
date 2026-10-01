@@ -142,3 +142,55 @@ test('the privacy page shows the loaded operator config', async () => {
   await choose('Privacy')
   expect(screen.getByTestId('access-logs').textContent).toContain('kept for up to 7 days')
 })
+
+const homeLink = () => screen.queryByRole('link', { name: 'Fretwork, home' })
+
+test('the logo home link shows on setup, the metronome and the privacy page, not during a session', async () => {
+  await renderApp()
+  expect(homeLink()?.getAttribute('href')).toBe('/')
+  expect(homeLink()?.textContent).toBe('fretwork')
+  await choose('Metronome')
+  expect(homeLink()).toBeTruthy()
+  await choose('Privacy')
+  expect(homeLink()).toBeTruthy()
+  expect(screen.queryByRole('navigation', { name: 'Tools' })).toBeNull()
+  await press('Escape')
+  await choose('1 minute changes')
+  await press(' ', 'Space')
+  expect(homeLink()).toBeNull()
+})
+
+async function goHome() {
+  await act(async () => {
+    fireEvent.click(homeLink()!)
+  })
+}
+
+test('home from a playing metronome stops it and shows setup', async () => {
+  const { metronome } = await renderApp()
+  await choose('Metronome')
+  await press(' ', 'Space')
+  expect(metronome.getState().playing).toBe(true)
+  await goHome()
+  expect(metronome.getState().playing).toBe(false)
+  expect(screen.getByRole('heading', { name: '1 Minute Changes' })).toBeTruthy()
+})
+
+test('home from history shows setup with the same pair', async () => {
+  await renderApp()
+  fireEvent.change(screen.getByLabelText('Second chord'), { target: { value: 'G' } })
+  await choose('History')
+  expect(screen.getByRole('heading', { name: 'History' })).toBeTruthy()
+  await goHome()
+  expect(screen.getByRole('heading', { name: '1 Minute Changes' })).toBeTruthy()
+  expect((screen.getByLabelText('Second chord') as HTMLInputElement).value).toBe('G')
+})
+
+test('home from the privacy page shows setup', async () => {
+  await renderApp()
+  await choose('Metronome')
+  await choose('Privacy')
+  await goHome()
+  expect(screen.getByRole('heading', { name: '1 Minute Changes' })).toBeTruthy()
+  expect(screen.getByRole('navigation', { name: 'Tools' })).toBeTruthy()
+})
