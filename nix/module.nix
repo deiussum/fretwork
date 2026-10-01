@@ -93,6 +93,13 @@ in
         # Always revalidate, so a new deployment is picked up on the next visit.
         locations."= /index.html".extraConfig = headers + noCache;
 
+        # The web app manifest, with its type set explicitly rather than
+        # relying on the MIME table.
+        locations."= /manifest.webmanifest".extraConfig = headers + ''
+          types { }
+          default_type application/manifest+json;
+        '';
+
         locations."= /config.json" = {
           alias = configJson;
           extraConfig = headers + noCache + "default_type application/json;";
