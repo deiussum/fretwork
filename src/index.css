@@ -128,13 +128,23 @@ kbd {
   color: var(--warn);
 }
 
-.tabs {
+.tabs,
+.tools {
   display: flex;
   gap: 0.5rem;
   margin-bottom: 1rem;
 }
 
-.tabs button[aria-pressed='true'] {
+.tools {
+  width: 100%;
+  max-width: 960px;
+  justify-content: center;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.tabs button[aria-pressed='true'],
+.tools button[aria-pressed='true'] {
   border-color: var(--accent);
   color: var(--accent);
   font-weight: 600;
@@ -487,4 +497,165 @@ kbd {
   gap: 0.5rem;
   flex-wrap: wrap;
   justify-content: center;
+}
+
+/* Metronome: tempo and beat readable from playing distance */
+.tempo {
+  margin: 0;
+  line-height: 1;
+}
+
+.tempo-number {
+  display: inline-block;
+  font-size: clamp(5rem, 26vh, 14rem);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: var(--live);
+}
+
+.tempo-unit {
+  font-size: clamp(1.5rem, 5vh, 3rem);
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.step-flash {
+  animation: step-flash 700ms ease-out;
+}
+
+@keyframes step-flash {
+  from {
+    color: var(--accent);
+    transform: scale(1.08);
+  }
+  to {
+    color: var(--live);
+    transform: scale(1);
+  }
+}
+
+.beats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: clamp(0.5rem, 2vw, 1.25rem);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.beat {
+  width: clamp(2rem, 7vh, 4rem);
+  height: clamp(2rem, 7vh, 4rem);
+  border-radius: 50%;
+  border: 3px solid var(--border);
+  background: var(--surface);
+}
+
+.beat.accent {
+  border-color: var(--accent);
+}
+
+.beat.current {
+  background: var(--live);
+  border-color: var(--live);
+}
+
+.beat.accent.current {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.metronome-controls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.5rem;
+}
+
+.stepper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.stepper-label {
+  color: var(--muted);
+}
+
+.stepper-value {
+  min-width: 4.5ch;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.stepper button {
+  min-width: 2.5rem;
+  padding: 0.25rem 0.5rem;
+}
+
+.trainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  max-width: 640px;
+  margin: 0;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.trainer .checkbox {
+  margin: 0;
+  font-weight: 600;
+}
+
+.trainer-fields {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+  width: 100%;
+}
+
+@media (max-width: 640px) {
+  .trainer-fields {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.trainer-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  color: var(--muted);
+  text-align: left;
+}
+
+.trainer-field input {
+  font: inherit;
+  font-weight: 700;
+  width: 100%;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+}
+
+.trainer-field input[aria-invalid='true'] {
+  border-color: var(--warn);
+}
+
+.trainer-field .warning {
+  font-size: 0.85rem;
+}
+
+.trainer-progress {
+  margin: 0;
+  font-size: clamp(1.25rem, 4vh, 2rem);
+  font-weight: 700;
+  color: var(--muted);
 }

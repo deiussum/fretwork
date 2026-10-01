@@ -3,8 +3,10 @@ import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import App from './App'
 import { FakeClock } from './engine/clock'
+import { MetronomeEngine } from './engine/metronome/metronome'
 import { SessionEngine } from './engine/session'
 import { RecordingSounds } from './engine/sounds'
+import { IntervalTicker } from './engine/ticker'
 import { domError, fakeInput, type FakeInputOptions } from './test/fakeInput'
 import { MemoryHistory } from './test/memoryHistory'
 
@@ -12,6 +14,7 @@ function setup(inputOptions: FakeInputOptions = {}) {
   const clock = new FakeClock()
   const history = new MemoryHistory()
   const engine = new SessionEngine({ clock, sounds: new RecordingSounds(), history })
+  const metronome = new MetronomeEngine({ clock, sounds: new RecordingSounds(), ticker: new IntervalTicker() })
   const fake = fakeInput(inputOptions)
   const advance = async (seconds: number) => {
     clock.advance(seconds)
@@ -19,11 +22,11 @@ function setup(inputOptions: FakeInputOptions = {}) {
       vi.advanceTimersByTime(seconds * 1000)
     })
   }
-  return { clock, history, engine, advance, ...fake }
+  return { clock, history, engine, metronome, advance, ...fake }
 }
 
 async function renderApp(ctx: ReturnType<typeof setup>) {
-  render(<App engine={ctx.engine} history={ctx.history} input={ctx.input} />)
+  render(<App engine={ctx.engine} history={ctx.history} input={ctx.input} metronome={ctx.metronome} />)
   await act(async () => {})
 }
 

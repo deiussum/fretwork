@@ -1,6 +1,6 @@
 import type { SharedAudioContext } from './audioContext'
 
-export type SoundKind = 'click' | 'go' | 'end'
+export type SoundKind = 'click' | 'go' | 'end' | 'tick' | 'accent'
 
 export interface SoundScheduler {
   /**
@@ -12,6 +12,8 @@ export interface SoundScheduler {
   schedule(kind: SoundKind, at: number): void
   /** Silence and discard everything scheduled that has not finished. */
   cancelAll(): void
+  /** Discard sounds scheduled to start at or after `time`; earlier ones play on. */
+  cancelFrom(time: number): void
 }
 
 type Tone = { freq: number; offset: number; duration: number }
@@ -26,11 +28,14 @@ const SOUNDS: Record<SoundKind, { tones: Tone[]; gain: number }> = {
     ],
     gain: 0.7,
   },
+  tick: { tones: [{ freq: 1200, offset: 0, duration: 0.03 }], gain: 0.5 },
+  accent: { tones: [{ freq: 1800, offset: 0, duration: 0.04 }], gain: 0.85 },
 }
 
 /** Synthesised sounds on the shared AudioContext. */
 export class WebAudioSounds implements SoundScheduler {
-  private readonly active = new Set<OscillatorNode>()
+  /** Oscillators that have not ended, with their start times. */
+  private readonly active = new Map<OscillatorNode, number>()
   private readonly audio: SharedAudioContext
 
   constructor(audio: SharedAudioContext) {
@@ -63,21 +68,31 @@ export class WebAudioSounds implements SoundScheduler {
       }
       osc.start(start)
       osc.stop(end + 0.01)
-      this.active.add(osc)
+      this.active.set(osc, start)
     }
   }
 
   cancelAll(): void {
-    for (const osc of this.active) {
-      osc.onended = null
-      try {
-        osc.stop()
-      } catch {
-        // Already stopped.
-      }
-      osc.disconnect()
-    }
+    for (const osc of this.active.keys()) this.silence(osc)
     this.active.clear()
+  }
+
+  cancelFrom(time: number): void {
+    for (const [osc, start] of this.active) {
+      if (start < time) continue
+      this.silence(osc)
+      this.active.delete(osc)
+    }
+  }
+
+  private silence(osc: OscillatorNode) {
+    osc.onended = null
+    try {
+      osc.stop()
+    } catch {
+      // Already stopped.
+    }
+    osc.disconnect()
   }
 }
 
@@ -98,5 +113,9 @@ export class RecordingSounds implements SoundScheduler {
   cancelAll(): void {
     this.scheduled = []
     this.cancelCount++
+  }
+
+  cancelFrom(time: number): void {
+    this.scheduled = this.scheduled.filter((s) => s.at < time)
   }
 }
