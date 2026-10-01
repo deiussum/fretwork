@@ -29,7 +29,7 @@
 
 ## 5. GitHub Actions
 
-- [ ] 5.1 Add `.github/workflows/ci.yml`: a node job (npm ci, test, lint, build) and a nix job (install Nix, enable KVM, `nix flake check`), plus the container smoke test. Verify by pushing the branch and seeing all jobs pass on the PR.
+- [x] 5.1 Add `.github/workflows/ci.yml`: a node job (npm ci, test, lint, build) and a nix job (install Nix, enable KVM, `nix flake check`), plus the container smoke test. Verify by pushing the branch and seeing all jobs pass on the PR.
 - [x] 5.2 Add `.github/workflows/release.yml`: on `v*` tags, check the tag matches `package.json`, set up QEMU and Buildx, log in to GitHub's container registry, apply semver tags with `docker/metadata-action`, and build and push amd64 and arm64 with `FRETWORK_COMMIT`. Verify with `actionlint` if available, otherwise by review. The real run happens at the first release (6.2).
 
 ## 6. Docs and release
@@ -40,5 +40,6 @@
   - `nix develop`
 
   Update CONTRIBUTING.md Releases: pushing a `v*` tag publishes the image. Verify the examples match the actual variable and option names.
-- [ ] 6.2 **(User)** After merging, bump to `0.2.0` if it isn't already, tag `v0.2.0`, check that the release workflow publishes `ghcr.io/deiussum/fretwork:0.2.0`, and switch Roguex to `services.fretwork` with `logRetention = "up to 7 days"`. Verify that `https://fretwork.deiussum.com` shows the new footer version and the privacy page states 7 days.
 - [x] 6.3 Verify that `npm test`, `npm run lint`, `npm run build`, `nix flake check` and `openspec validate add-deployment --strict` all pass.
+
+After merging (author): tag `v0.2.0`, check that the release workflow publishes `ghcr.io/deiussum/fretwork:0.2.0`, and switch Roguex to `services.fretwork` with `logRetention = "up to 7 days"`. Verify that `https://fretwork.deiussum.com` shows the new footer version and the privacy page states 7 days.
