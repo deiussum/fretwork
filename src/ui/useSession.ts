@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from 'react'
 import type { ChordPair } from '../domain/chords'
+import type { Clock } from '../engine/clock'
 import type { SessionEngine, SessionState } from '../engine/session'
 
 export function useSession(engine: SessionEngine): SessionState {
@@ -7,18 +8,20 @@ export function useSession(engine: SessionEngine): SessionState {
 }
 
 /**
- * The single global keyboard handler: Space starts (setup/result), Escape
- * aborts or goes back. Enter while confirming is handled by the score form.
- * `start` is undefined when starting isn't currently allowed.
- * Space typed into a text field is left to the field.
+ * Keyboard handler for 1 minute changes, installed only while `active`:
+ * Space starts (setup/result), Escape aborts or goes back. Enter while
+ * confirming is handled by the score form. `start` is undefined when starting
+ * isn't currently allowed. Space typed into a text field is left to the field.
  */
 export function useSessionKeys(
   engine: SessionEngine,
   state: SessionState,
   selectedPair: ChordPair | undefined,
   start: ((pair: ChordPair) => void) | undefined,
+  active = true,
 ) {
   useEffect(() => {
+    if (!active) return
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.repeat) return
       const isSpace = e.code === 'Space' || e.key === ' '
@@ -51,15 +54,15 @@ export function useSessionKeys(
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [engine, state, selectedPair, start])
+  }, [engine, state, selectedPair, start, active])
 }
 
 /**
- * Re-evaluates `read(now)` against the engine clock every animation frame while
+ * Re-evaluates `read(now)` against the audio clock every animation frame while
  * `active`, re-rendering only when the returned value changes.
  */
-export function useClockValue<T>(engine: SessionEngine, active: boolean, read: (now: number) => T): T {
-  const [value, setValue] = useState(() => read(engine.now()))
+export function useClockValue<T>(clock: Clock, active: boolean, read: (now: number) => T): T {
+  const [value, setValue] = useState(() => read(clock.now()))
   // Always call the latest `read`, so a frame loop that outlives a state change sees fresh props.
   const readRef = useRef(read)
   useLayoutEffect(() => {
@@ -69,18 +72,18 @@ export function useClockValue<T>(engine: SessionEngine, active: boolean, read: (
     if (!active) return
     let frame = 0
     const loop = () => {
-      setValue(readRef.current(engine.now()))
+      setValue(readRef.current(clock.now()))
       frame = requestAnimationFrame(loop)
     }
     loop()
     return () => cancelAnimationFrame(frame)
-  }, [engine, active])
+  }, [clock, active])
   return value
 }
 
 const NON_TEXT_INPUTS = new Set(['button', 'checkbox', 'color', 'file', 'image', 'radio', 'range', 'reset', 'submit'])
 
-function isTextEntry(target: EventTarget | null): boolean {
+export function isTextEntry(target: EventTarget | null): boolean {
   if (target instanceof HTMLTextAreaElement) return true
   return target instanceof HTMLInputElement && !NON_TEXT_INPUTS.has(target.type)
 }
