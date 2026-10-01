@@ -40,6 +40,7 @@ openspec/   specs, change proposals and project config (see below)
 - **Chord pairs are unordered.** Use `pairKey(a, b)` for identity (A↔D equals D↔A). Keep the picked order only for display.
 - **Results carry their counting method** (`manual` or `mic`) and an optional `detectedScore`, so that automatic counting can be added without changing the data model.
 - **Keyboard first.** The player's hands are on the guitar. Space starts, Escape aborts or goes back, Enter confirms. Session screens must be readable from about 2 m away.
+- **Privacy is a promise.** The app talks only to its own site and stores data only in the browser (see `src/ui/PrivacyView.tsx`). Any change that adds network access, an external resource or new stored data must update the privacy page (and its `PRIVACY_UPDATED` date) and, if needed, the CSP in `src/csp.ts`. Check the production build (`npm run build && npx vite preview`) for CSP violations after touching build config.
 - TypeScript config uses `erasableSyntaxOnly`: no `enum`, no namespaces, no constructor parameter properties.
 
 ## Testing

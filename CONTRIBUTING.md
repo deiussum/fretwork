@@ -35,6 +35,7 @@ These are the main rules; see [AGENTS.md](AGENTS.md) for the rest.
 - **The audio clock is the only clock.** Schedule sounds ahead on `AudioContext.currentTime`. Never chain `setTimeout` for anything audible.
 - **Inject dependencies** (`Clock`, `SoundScheduler`, repositories and so on) so that engine code can be tested with fakes from `src/test/` and `FakeClock`.
 - **Keyboard first.** The player's hands are on the guitar, so every tool must be usable from the keyboard and readable from about 2 m away.
+- **Privacy is a promise.** The in-app privacy page says the app talks only to its own site and keeps data only in the browser. If your change adds network access, an external resource or new stored data, update the privacy page (`src/ui/PrivacyView.tsx`, including its last-updated date) and, if needed, the Content-Security-Policy in `src/csp.ts`. After touching build config, check the production build (`npm run build && npx vite preview`) for CSP violations in the browser console.
 - TypeScript is strict and uses `erasableSyntaxOnly`: no `enum`, namespaces or constructor parameter properties.
 
 ## Testing
@@ -59,6 +60,10 @@ Before opening a PR:
   The exception is a **draft PR** opened for early feedback before the change is ready for final review. Archive it before marking the PR ready.
 
 In the PR description, say what changed and how you tested it, including any manual or in-browser checks. PRs are squash-merged, so the PR title becomes the commit message. Write it as a Conventional Commit too.
+
+## Releases
+
+The version in `package.json` is shown in the app's footer, together with the commit it was built from. For each deploy, bump the version in `package.json` (while it is 0.x, raise the minor version for new features and the patch version for fixes) and tag the release commit `v0.x.y`.
 
 ## License
 

@@ -91,3 +91,48 @@ test('the chosen pair survives a visit to the metronome', async () => {
   await choose('1 minute changes')
   expect((screen.getByLabelText('Second chord') as HTMLInputElement).value).toBe('E')
 })
+
+const footer = () => screen.queryByRole('contentinfo')
+
+test('the footer with the Privacy link and version shows on setup and the metronome, not during a session', async () => {
+  await renderApp()
+  expect(footer()?.textContent).toContain('Privacy')
+  expect(footer()?.textContent).toContain('dev')
+  await choose('Metronome')
+  expect(footer()).toBeTruthy()
+  await choose('1 minute changes')
+  await press(' ', 'Space')
+  expect(footer()).toBeNull()
+})
+
+test('opening Privacy from the metronome stops it and hides the tools', async () => {
+  const { metronome } = await renderApp()
+  await choose('Metronome')
+  await press(' ', 'Space')
+  await choose('Privacy')
+  expect(metronome.getState().playing).toBe(false)
+  expect(screen.getByRole('heading', { name: 'Privacy' })).toBeTruthy()
+  expect(screen.queryByRole('navigation', { name: 'Tools' })).toBeNull()
+  await press('Escape')
+  expect(screen.getByRole('heading', { name: 'Metronome' })).toBeTruthy()
+})
+
+test('Escape from Privacy returns to 1 minute changes with the typed pair', async () => {
+  await renderApp()
+  fireEvent.change(screen.getByLabelText('Second chord'), { target: { value: 'G' } })
+  fireEvent.change(screen.getByLabelText('First chord'), { target: { value: 'E' } })
+  await choose('Privacy')
+  expect(screen.queryByLabelText('First chord')).toBeNull()
+  await press('Escape')
+  expect((screen.getByLabelText('First chord') as HTMLInputElement).value).toBe('E')
+  expect((screen.getByLabelText('Second chord') as HTMLInputElement).value).toBe('G')
+})
+
+test('Space on the privacy page starts nothing', async () => {
+  const { engine, metronome } = await renderApp()
+  await choose('Privacy')
+  await press(' ', 'Space')
+  expect(engine.getState().kind).toBe('idle')
+  expect(metronome.getState().playing).toBe(false)
+  expect(screen.getByRole('heading', { name: 'Privacy' })).toBeTruthy()
+})
