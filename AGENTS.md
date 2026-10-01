@@ -56,6 +56,7 @@ Work is planned in `openspec/`. Behaviour contracts live in `openspec/specs/<cap
 - When implementing a change, follow its `tasks.md` and tick each `- [ ]` as it's completed.
 - If implementation diverges from the specs or design, update the artifacts rather than silently narrowing scope.
 - `openspec validate <change> --strict` must pass.
+- Archive the change (syncing its specs) before opening a PR, so the PR includes the archived change and the updated specs. The exception is a draft PR opened for early review before the change is ready for final review. Archive before marking it ready.
 
 ## Commits
 
