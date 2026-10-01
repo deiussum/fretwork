@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, expect, test, vi } from 'vitest'
-import { LOG_RETENTION, PRIVACY_UPDATED, PROJECT_URL, PrivacyView } from './PrivacyView'
+import { PRIVACY_UPDATED, PROJECT_URL, PrivacyView } from './PrivacyView'
 
 afterEach(cleanup)
 
@@ -32,9 +32,31 @@ test('Escape and Back close the page', () => {
   expect(onClose).toHaveBeenCalledTimes(2)
 })
 
-test('states how long access logs are kept, with no placeholder', () => {
+const accessLogs = () => screen.getByTestId('access-logs').textContent
+
+test('shows the log retention the operator configured', () => {
+  render(<PrivacyView onClose={() => {}} operator={{ logRetention: 'up to 7 days' }} />)
+  expect(accessLogs()).toContain("This site's operator states that they are kept for up to 7 days.")
+})
+
+test('says when the operator has not stated a retention', () => {
   render(<PrivacyView onClose={() => {}} />)
-  expect(LOG_RETENTION).toBeDefined()
-  expect(screen.getByText(/standard access logs/).textContent).toContain(`They are kept for ${LOG_RETENTION}.`)
-  expect(screen.queryByText(/not set/)).toBeNull()
+  expect(accessLogs()).toContain("This site's operator hasn't stated how long they are kept.")
+  expect(screen.queryByTestId('operator-contact')).toBeNull()
+})
+
+test('a mailto or https contact is a link', () => {
+  render(<PrivacyView onClose={() => {}} operator={{ operatorContact: 'mailto:admin@example.com' }} />)
+  const link = screen.getByRole('link', { name: 'admin@example.com' })
+  expect(link.getAttribute('href')).toBe('mailto:admin@example.com')
+  cleanup()
+  render(<PrivacyView onClose={() => {}} operator={{ operatorContact: 'https://example.com/contact' }} />)
+  expect(screen.getByRole('link', { name: 'https://example.com/contact' }).getAttribute('rel')).toContain('noopener')
+})
+
+test('any other contact is plain text', () => {
+  render(<PrivacyView onClose={() => {}} operator={{ operatorContact: 'Ask in the #music channel' }} />)
+  const contact = screen.getByTestId('operator-contact')
+  expect(contact.textContent).toContain('Ask in the #music channel')
+  expect(contact.querySelector('a')).toBeNull()
 })

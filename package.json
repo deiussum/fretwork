@@ -2,7 +2,7 @@
   "name": "fretwork",
   "private": true,
   "license": "MIT",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -11,7 +11,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "detect": "tsx scripts/detect.ts",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "nginx-headers": "tsx scripts/nginx-headers.ts"
   },
   "dependencies": {
     "react": "^19.2.8",

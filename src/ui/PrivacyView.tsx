@@ -1,13 +1,8 @@
 import { useEffect } from 'react'
+import type { OperatorConfig } from '../domain/operatorConfig'
 
 /** Update whenever the statement below changes. */
 export const PRIVACY_UPDATED = '2026-10-01'
-
-/**
- * How long the servers that host and serve the app keep access logs: the
- * longest of them, e.g. "30 days". The page flags it while unset.
- */
-export const LOG_RETENTION: string | undefined = 'up to about six months'
 
 export const PROJECT_URL = 'https://github.com/deiussum/fretwork'
 
@@ -15,9 +10,10 @@ const updatedFormat = new Intl.DateTimeFormat(undefined, { dateStyle: 'long', ti
 
 /**
  * What Fretwork does with your data. Keep this in step with the app: any
- * change that adds network access or stored data must update it.
+ * change that adds network access or stored data must update it. Hosting
+ * details come from the operator of this instance (see operatorConfig.ts).
  */
-export function PrivacyView({ onClose }: { onClose: () => void }) {
+export function PrivacyView({ onClose, operator = {} }: { onClose: () => void; operator?: OperatorConfig }) {
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose()
@@ -39,10 +35,12 @@ export function PrivacyView({ onClose }: { onClose: () => void }) {
         Only the requests your browser makes to load the app's own files from this site. The app doesn't contact any
         other site, and the published version blocks itself from doing so with a Content-Security-Policy.
       </p>
-      <p>
-        Like most websites, the servers that host and serve Fretwork keep standard access logs: your IP address, the
-        time, and which files were requested. They are kept for{' '}
-        {LOG_RETENTION ?? <strong className="warning">[log retention not set]</strong>}.
+      <p data-testid="access-logs">
+        Like most websites, the servers that host and serve this site may keep standard access logs: your IP address,
+        the time, and which files were requested.{' '}
+        {operator.logRetention
+          ? `This site's operator states that they are kept for ${operator.logRetention}.`
+          : "This site's operator hasn't stated how long they are kept."}
       </p>
 
       <h2>Microphone</h2>
@@ -71,6 +69,11 @@ export function PrivacyView({ onClose }: { onClose: () => void }) {
       </p>
 
       <h2>Questions</h2>
+      {operator.operatorContact && (
+        <p data-testid="operator-contact">
+          For questions about this site, contact its operator: <Contact value={operator.operatorContact} />
+        </p>
+      )}
       <p>
         Fretwork is open source. Ask questions or report problems on{' '}
         <a href={PROJECT_URL} target="_blank" rel="noopener noreferrer">
@@ -91,4 +94,17 @@ export function PrivacyView({ onClose }: { onClose: () => void }) {
       </p>
     </section>
   )
+}
+
+/** An operator contact: a link for https: and mailto: values, plain text otherwise. */
+function Contact({ value }: { value: string }) {
+  if (value.startsWith('https://')) {
+    return (
+      <a href={value} target="_blank" rel="noopener noreferrer">
+        {value}
+      </a>
+    )
+  }
+  if (value.startsWith('mailto:')) return <a href={value}>{value.slice('mailto:'.length)}</a>
+  return <>{value}</>
 }

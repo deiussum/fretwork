@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import { LocalStorageHistory } from './domain/localStorageHistory'
 import { LocalStorageMetronomeSettings } from './domain/metronomeSettings'
+import { loadOperatorConfig } from './domain/operatorConfig'
 import { LocalStorageSettings } from './domain/settings'
 import { SharedAudioContext } from './engine/audioContext'
 import { InputController } from './engine/input/audioInput'
@@ -59,8 +60,11 @@ metronome.subscribe(() => {
   metronomeSettings.save(settings)
 })
 
+// Fetched once, in the background, so the first render isn't delayed.
+const operatorConfig = loadOperatorConfig()
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App engine={engine} history={history} input={input} recorder={recorder} metronome={metronome} />
+    <App engine={engine} history={history} input={input} recorder={recorder} metronome={metronome} operatorConfig={operatorConfig} />
   </StrictMode>,
 )

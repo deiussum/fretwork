@@ -4,7 +4,7 @@ Thanks for helping out. This guide covers how work is planned, built and reviewe
 
 ## Getting started
 
-You need a current Node.js LTS and the [OpenSpec](https://github.com/Fission-AI/OpenSpec) CLI (`npm install -g @fission-ai/openspec`).
+You need a current Node.js LTS and the [OpenSpec](https://github.com/Fission-AI/OpenSpec) CLI (`npm install -g @fission-ai/openspec`). With Nix, `nix develop` provides both.
 
 ```sh
 npm install
@@ -63,7 +63,14 @@ In the PR description, say what changed and how you tested it, including any man
 
 ## Releases
 
-The version in `package.json` is shown in the app's footer, together with the commit it was built from. For each deploy, bump the version in `package.json` (while it is 0.x, raise the minor version for new features and the patch version for fixes) and tag the release commit `v0.x.y`.
+The version in `package.json` is shown in the app's footer, together with the commit it was built from. For each release:
+
+1. Bump the version in `package.json`. While it is 0.x, raise the minor version for new features and the patch version for fixes.
+2. After the bump is merged, tag the release commit `v0.x.y` and push the tag.
+
+Pushing the tag runs the release workflow. It checks that the tag matches `package.json` and publishes the container image to `ghcr.io/deiussum/fretwork` as `<version>`, `<major>.<minor>` and `latest`.
+
+CI runs on every pull request: tests, lint and build, `nix flake check` (which builds the package and runs the NixOS module's VM test), and a smoke test of the container image (`deploy/smoke-test.sh`).
 
 ## License
 

@@ -6,8 +6,17 @@ import { defineConfig } from 'vitest/config'
 import { formatBuildVersion } from './src/buildVersion.ts'
 import { buildCsp } from './src/csp.ts'
 
-/** Short hash of the commit being built, or undefined outside a git checkout. */
-function gitHash(): string | undefined {
+/**
+ * Short hash of the commit being built: `FRETWORK_COMMIT` when set (container
+ * and Nix builds have no .git), otherwise git, otherwise undefined.
+ */
+function commitHash(): string | undefined {
+  const fromEnv = process.env.FRETWORK_COMMIT?.trim()
+  if (fromEnv) {
+    // Shorten a full hash, keeping a "-dirty" marker (Nix builds of uncommitted trees).
+    const match = /^([0-9a-f]{7,40})(-dirty)?$/.exec(fromEnv)
+    return match ? match[1].slice(0, 7) + (match[2] ?? '') : fromEnv
+  }
   try {
     return execSync('git rev-parse --short HEAD', { stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim() || undefined
   } catch {
@@ -32,7 +41,7 @@ export default defineConfig(({ command }) => {
   return {
     plugins: [react(), contentSecurityPolicy()],
     define: {
-      __APP_VERSION__: JSON.stringify(formatBuildVersion(command, version, command === 'build' ? gitHash() : undefined)),
+      __APP_VERSION__: JSON.stringify(formatBuildVersion(command, version, command === 'build' ? commitHash() : undefined)),
     },
     test: {
       // Engine/domain tests run in node; UI tests opt in with `// @vitest-environment jsdom`.
