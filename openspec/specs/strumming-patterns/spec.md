@@ -52,7 +52,7 @@ In 8ths and 16ths patterns, the direction of each slot SHALL follow from its pos
 - **THEN** "e" falls 0.333 s after "1", "&" 0.5 s after it, and "a" 0.833 s after it
 
 ### Requirement: Preset patterns
-The tool SHALL include built-in patterns that cannot be edited or deleted. All are in 4 beats per bar, 1 bar long and unswung unless stated. The presets SHALL include at least:
+The tool SHALL include built-in patterns that cannot be edited or deleted. All are in 4 beats per bar, 1 bar long and unswung unless stated; bars are separated by `|`. The presets SHALL include at least:
 
 | Name | Subdivision | Slots |
 |---|---|---|
@@ -63,6 +63,7 @@ The tool SHALL include built-in patterns that cannot be edited or deleted. All a
 | Reggae skank | 8ths | `.c.c.c.c` |
 | Shuffle | 8ths, 100% swing | `x.xx.xxx` |
 | Folk 16ths | 16ths | `x.xxx.xxx.xxx.xx` |
+| Wonderwall | 16ths, 2 bars | `x.x.x.xxxxx.x.xx\|xxx.x.xx.x.xxxxx` |
 | Triplet down-up-down | triplets, each beat down, up, down | `xxxxxxxxxxxx` |
 
 The first time the tool opens, Old faithful SHALL be selected.
@@ -74,6 +75,10 @@ The first time the tool opens, Old faithful SHALL be selected.
 #### Scenario: Presets are read-only
 - **WHEN** a preset is selected
 - **THEN** it offers Duplicate but not Edit or Delete
+
+#### Scenario: Wonderwall
+- **WHEN** the player selects the Wonderwall preset
+- **THEN** it plays two bars of 16ths, the first strummed D D D D U D U D D D U and the second D U D D D U U U D U D U, then repeats
 
 ### Requirement: Custom patterns
 The player SHALL be able to create a new pattern, duplicate any pattern (preset or custom) into a new custom pattern, edit a custom pattern, and delete a custom pattern. Deleting SHALL ask for confirmation in the page, not with a browser dialog. Custom patterns SHALL be listed after the presets, and the player's choice of pattern SHALL be kept when switching tools.

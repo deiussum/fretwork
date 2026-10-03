@@ -20,6 +20,8 @@ export const PRESET_PATTERNS: readonly Pattern[] = [
   straight('reggae-skank', 'Reggae skank', '.c.c.c.c'),
   straight('shuffle', 'Shuffle', 'x.xx.xxx', 2, 1),
   straight('folk-16ths', 'Folk 16ths', 'x.xxx.xxx.xxx.xx', 4),
+  // As Justin Guitar teaches it.
+  straight('wonderwall', 'Wonderwall', 'x.x.x.xxxxx.x.xx|xxx.x.xx.x.xxxxx', 4),
   {
     id: 'preset:triplet-dud',
     name: 'Triplet down-up-down',
