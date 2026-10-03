@@ -12,7 +12,8 @@
     "test:watch": "vitest",
     "detect": "tsx scripts/detect.ts",
     "preview": "vite preview",
-    "nginx-headers": "tsx scripts/nginx-headers.ts"
+    "nginx-headers": "tsx scripts/nginx-headers.ts",
+    "release-notes": "tsx scripts/release-notes.ts"
   },
   "dependencies": {
     "react": "^19.2.8",
