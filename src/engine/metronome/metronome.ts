@@ -60,6 +60,22 @@ export type Position = Beat & {
   atTarget: boolean
 }
 
+/**
+ * Follows what the metronome schedules, so another engine can schedule its
+ * own sounds on each beat.
+ */
+export interface BeatListener {
+  /** Called after each beat is scheduled, in order. */
+  beatScheduled(beat: Beat): void
+  /**
+   * Called when every scheduled beat from `fromTime` on is discarded: before a
+   * live change schedules them again, and on stop (with the current time).
+   */
+  rewound(fromTime: number): void
+  /** Asked before each beat's click is scheduled; true schedules the beat without a click. */
+  muteClick?(beat: Beat): boolean
+}
+
 type Run = {
   nextBeatTime: number
   bar: number
@@ -77,6 +93,7 @@ type Deps = {
   settings?: MetronomeSettings
   visibility?: VisibilitySource
   config?: MetronomeConfig
+  listener?: BeatListener
 }
 
 /**
@@ -91,6 +108,7 @@ export class MetronomeEngine {
   private readonly sounds: SoundScheduler
   private readonly ticker: Ticker
   private readonly visibility: VisibilitySource | undefined
+  private readonly listener: BeatListener | undefined
   readonly config: MetronomeConfig
   private run: Run | undefined
   /** Incremented to invalidate a start that is still resuming audio. */
@@ -102,6 +120,7 @@ export class MetronomeEngine {
     this.sounds = deps.sounds
     this.ticker = deps.ticker
     this.visibility = deps.visibility
+    this.listener = deps.listener
     this.config = deps.config ?? DEFAULT_METRONOME_CONFIG
     this.state = { playing: false, settings: deps.settings ?? DEFAULT_METRONOME_SETTINGS }
   }
@@ -152,6 +171,7 @@ export class MetronomeEngine {
     this.offVisibility?.()
     this.offVisibility = undefined
     this.sounds.cancelAll()
+    this.listener?.rewound(this.clock.now())
     this.run = undefined
     this.setState({ ...this.state, playing: false })
   }
@@ -209,6 +229,14 @@ export class MetronomeEngine {
     this.updateSettings({ trainer }, false)
   }
 
+  /**
+   * Discard the beats that have not sounded and schedule them again under the
+   * current settings, so a listener can reschedule its own sounds for them.
+   */
+  rescheduleUpcoming(): void {
+    if (this.state.playing) this.reschedule()
+  }
+
   /** Where the metronome is at audio-clock time `now`, or undefined before the first click. */
   position(now: number): Position | undefined {
     const beat = this.run && this.beatAt(now)
@@ -258,8 +286,11 @@ export class MetronomeEngine {
         beatsPerBar: run.barBeats,
         bpm: this.tempoOfBar(run.bar),
       }
-      this.sounds.schedule(beat.beatInBar === 0 && beat.beatsPerBar > 1 ? 'accent' : 'tick', beat.time)
+      if (!this.listener?.muteClick?.(beat)) {
+        this.sounds.schedule(beat.beatInBar === 0 && beat.beatsPerBar > 1 ? 'accent' : 'tick', beat.time)
+      }
       run.beats.push(beat)
+      this.listener?.beatScheduled(beat)
       run.nextBeatTime += 60 / beat.bpm
       run.beatInBar++
       if (run.beatInBar >= run.barBeats) {
@@ -284,6 +315,7 @@ export class MetronomeEngine {
     if (first !== -1) {
       const next = run.beats[first]
       this.sounds.cancelFrom(next.time)
+      this.listener?.rewound(next.time)
       run.beats.length = first
       run.nextBeatTime = next.time
       run.bar = next.bar

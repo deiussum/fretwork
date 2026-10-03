@@ -8,6 +8,7 @@ import { SessionEngine } from './engine/session'
 import { RecordingSounds } from './engine/sounds'
 import { IntervalTicker } from './engine/ticker'
 import { domError, fakeInput, type FakeInputOptions } from './test/fakeInput'
+import { testStrumming } from './test/memoryPatterns'
 import { MemoryHistory } from './test/memoryHistory'
 
 function setup(inputOptions: FakeInputOptions = {}) {
@@ -26,7 +27,7 @@ function setup(inputOptions: FakeInputOptions = {}) {
 }
 
 async function renderApp(ctx: ReturnType<typeof setup>) {
-  render(<App engine={ctx.engine} history={ctx.history} input={ctx.input} metronome={ctx.metronome} />)
+  render(<App engine={ctx.engine} history={ctx.history} input={ctx.input} metronome={ctx.metronome} strumming={testStrumming(ctx.clock)} />)
   await act(async () => {})
 }
 

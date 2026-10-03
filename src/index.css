@@ -699,6 +699,320 @@ kbd {
   color: var(--muted);
 }
 
+/* Strumming: the grid is the focus, readable from playing distance */
+.strumming .tempo-number {
+  font-size: clamp(2rem, 6vh, 3.5rem);
+}
+
+.strumming .tempo-unit {
+  font-size: clamp(1rem, 3vh, 1.5rem);
+}
+
+.sound-choice {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.sound-choice legend {
+  float: left;
+  margin-right: 0.25rem;
+  color: var(--muted);
+}
+
+.sound-choice .checkbox {
+  margin: 0;
+  font-weight: 600;
+}
+
+.pattern-title {
+  margin: 0;
+  font-size: clamp(1.25rem, 4vh, 2rem);
+  font-weight: 700;
+}
+
+.swing-tag {
+  margin-left: 0.5em;
+  padding: 0.05em 0.45em;
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+  color: var(--accent);
+  font-size: 0.7em;
+  font-weight: 600;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.count-in-label {
+  color: var(--accent);
+}
+
+.pattern-grid {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+}
+
+.grid-bar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  width: 100%;
+}
+
+.grid-bar-label {
+  margin: 0;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.grid-beats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: clamp(0.5rem, 1.5vw, 1rem);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.grid-slots {
+  display: flex;
+  gap: 0.25rem;
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0.25rem;
+  border-bottom: 3px solid var(--border);
+}
+
+.player-grid {
+  --slot-width: clamp(2.5rem, 8vw, 6.5rem);
+}
+
+.player-grid.sub-4 {
+  --slot-width: clamp(1.7rem, 3.9vw, 3.2rem);
+}
+
+/* Each slot takes its share of the beat, so swung slots sit where they sound. */
+.player-grid .grid-slots {
+  width: calc(var(--slots) * var(--slot-width));
+}
+
+.player-grid .slot {
+  flex: var(--share, 1) 1 0;
+  min-width: 0;
+}
+
+.slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: clamp(2.5rem, 8vw, 6.5rem);
+  padding: 0.25rem;
+  border-radius: 8px;
+  line-height: 1;
+}
+
+.slot-badge {
+  height: 1.1em;
+  font-size: clamp(1rem, 3vh, 1.75rem);
+  font-weight: 800;
+  color: var(--accent);
+}
+
+.slot-arrow {
+  font-size: clamp(3rem, min(16vh, 10vw), 8rem);
+  font-weight: 800;
+  color: var(--live);
+}
+
+.slot-count {
+  font-size: clamp(1rem, 3.5vh, 2rem);
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.sub-4 .slot {
+  min-width: clamp(1.5rem, 3.5vw, 3rem);
+  padding: 0.25rem 0.1rem;
+}
+
+.sub-4 .slot-arrow {
+  font-size: clamp(2rem, min(11vh, 5vw), 5rem);
+}
+
+.slot.miss .slot-arrow {
+  opacity: 0.2;
+}
+
+.slot.accent .slot-arrow {
+  color: var(--accent);
+}
+
+.slot.chuck .slot-badge {
+  color: var(--live);
+}
+
+.slot.chuck .slot-arrow {
+  opacity: 0.55;
+}
+
+.slot.current {
+  background: var(--live);
+}
+
+.slot.current .slot-arrow,
+.slot.current .slot-count,
+.slot.current .slot-badge {
+  color: var(--bg);
+}
+
+.slot.current.accent .slot-arrow {
+  color: var(--accent);
+}
+
+.pattern-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+  margin-top: 1rem;
+  text-align: left;
+}
+
+.pattern-list h2 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.pattern-list ul {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+  gap: 0.5rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.pattern-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.15rem;
+  width: 100%;
+  height: 100%;
+  text-align: left;
+}
+
+.pattern-item[aria-pressed='true'] {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+.pattern-name {
+  font-weight: 600;
+}
+
+.pattern-notation {
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 0.85rem;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
+.pattern-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+button.danger {
+  border-color: var(--warn);
+  color: var(--warn);
+}
+
+/* Pattern editor */
+.editor-fields {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem 1.5rem;
+}
+
+.editor-name,
+.editor-swing {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--muted);
+}
+
+.editor-name input {
+  font: inherit;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+}
+
+.editor-swing label {
+  min-width: 8ch;
+}
+
+.editor-subdivision {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.editor-subdivision legend {
+  float: left;
+  margin-right: 0.25rem;
+  color: var(--muted);
+}
+
+.editor-subdivision .checkbox {
+  margin: 0;
+}
+
+.editor-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.slot-button {
+  padding: 0;
+}
+
+.slot-button .slot-arrow {
+  font-size: clamp(1.75rem, 5vh, 3rem);
+}
+
+.direction-button {
+  padding: 0 0.6rem;
+}
+
+.editor-buttons {
+  display: flex;
+  gap: 0.75rem;
+}
+
 /* Footer */
 .footer {
   display: flex;

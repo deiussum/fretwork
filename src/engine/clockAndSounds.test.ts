@@ -37,19 +37,20 @@ test('recording scheduler records metronome sounds and cancels from a time', () 
 
 /** Minimal AudioContext stand-in that tracks oscillator start and stop calls. */
 function fakeAudio() {
-  const oscillators: { startAt: number; stopped: number[] }[] = []
+  const oscillators: { startAt: number; stopped: number[]; frequency: { value: number } }[] = []
   const param = () => ({ value: 0, setValueAtTime() {}, linearRampToValueAtTime() {}, exponentialRampToValueAtTime() {} })
   const node = () => ({ connect: (n: unknown) => n, disconnect() {} })
   const ctx = {
     destination: {},
     createGain: () => ({ ...node(), gain: param() }),
     createOscillator: () => {
-      const record = { startAt: Number.NaN, stopped: [] as number[] }
+      const frequency = param()
+      const record = { startAt: Number.NaN, stopped: [] as number[], frequency }
       oscillators.push(record)
       return {
         ...node(),
         type: 'sine',
-        frequency: param(),
+        frequency,
         onended: null,
         start: (t: number) => (record.startAt = t),
         stop: (t = 0) => record.stopped.push(t),
@@ -72,4 +73,18 @@ test('web audio cancelFrom stops only sounds starting at or after the time', () 
   expect(oscillators.map((o) => o.stopped.length)).toEqual([1, 2, 2])
   sounds.cancelAll()
   expect(oscillators.map((o) => o.stopped.length)).toEqual([2, 2, 2])
+})
+
+test('strumming guide: up is higher than down, accents share the pitch, chuck is lowest', () => {
+  const { audio, oscillators } = fakeAudio()
+  const sounds = new WebAudioSounds(audio)
+  for (const kind of ['strumDown', 'strumUp', 'strumDownAccent', 'strumUpAccent', 'chuck', 'tick'] as const) {
+    sounds.schedule(kind, 1)
+  }
+  const [down, up, downAccent, upAccent, chuck, click] = oscillators.map((o) => o.frequency.value)
+  expect(up).toBeGreaterThan(down)
+  expect(downAccent).toBe(down)
+  expect(upAccent).toBe(up)
+  expect(chuck).toBeLessThan(down)
+  expect(new Set([down, up, chuck, click]).size).toBe(4)
 })

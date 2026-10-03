@@ -1,5 +1,5 @@
-import { useEffect, useRef, useSyncExternalStore } from 'react'
-import type { MetronomeEngine, MetronomeState } from '../engine/metronome/metronome'
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
+import type { Beat, MetronomeEngine, MetronomeState } from '../engine/metronome/metronome'
 import { TapTempo } from '../engine/metronome/tapTempo'
 import { isTextEntry } from './useSession'
 
@@ -58,4 +58,14 @@ export function useMetronomeKeys(engine: MetronomeEngine) {
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [engine])
+}
+
+/** Increments each time the playing tempo steps up, to restart the flash animation. */
+export function useStepFlash(beat: Beat | undefined): number {
+  const [state, setState] = useState<{ beat?: Beat; flashes: number }>({ flashes: 0 })
+  if (beat !== state.beat) {
+    const steppedUp = beat !== undefined && state.beat !== undefined && beat.bpm > state.beat.bpm
+    setState({ beat, flashes: state.flashes + (steppedUp ? 1 : 0) })
+  }
+  return state.flashes
 }

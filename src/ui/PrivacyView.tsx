@@ -3,7 +3,7 @@ import type { OperatorConfig } from '../domain/operatorConfig'
 import { PROJECT_URL } from '../project'
 
 /** Update whenever the statement below changes. */
-export const PRIVACY_UPDATED = '2026-10-01'
+export const PRIVACY_UPDATED = '2026-10-03'
 
 
 const updatedFormat = new Intl.DateTimeFormat(undefined, { dateStyle: 'long', timeZone: 'UTC' })
@@ -61,7 +61,8 @@ export function PrivacyView({ onClose, operator = {} }: { onClose: () => void; o
       <ul>
         <li>Your practice results: chord pairs, scores, dates, and in Mic mode the strum times.</li>
         <li>The last chord pair you practised.</li>
-        <li>Your settings for counting, audio input and the metronome.</li>
+        <li>Your settings for counting, audio input, the metronome and strumming.</li>
+        <li>The strumming patterns you made.</li>
         <li>The ID of the input device you chose, a per-site ID assigned by your browser.</li>
       </ul>
       <p>

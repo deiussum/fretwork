@@ -8,6 +8,7 @@ import { SessionEngine } from '../engine/session'
 import { RecordingSounds } from '../engine/sounds'
 import { IntervalTicker } from '../engine/ticker'
 import { fakeInput } from '../test/fakeInput'
+import { testStrumming } from '../test/memoryPatterns'
 import { MemoryHistory } from '../test/memoryHistory'
 import { MemoryUiPrefs } from '../test/memoryUiPrefs'
 import confirmScreenSource from './ConfirmScreen.tsx?raw'
@@ -19,7 +20,7 @@ async function renderApp(uiPrefs = new MemoryUiPrefs()) {
   const engine = new SessionEngine({ clock, sounds: new RecordingSounds(), history })
   const metronome = new MetronomeEngine({ clock, sounds: new RecordingSounds(), ticker: new IntervalTicker() })
   const { input } = fakeInput()
-  render(<App engine={engine} history={history} input={input} metronome={metronome} uiPrefs={uiPrefs} />)
+  render(<App engine={engine} history={history} input={input} metronome={metronome} strumming={testStrumming(clock)} uiPrefs={uiPrefs} />)
   await act(async () => {})
   return { engine, uiPrefs }
 }
