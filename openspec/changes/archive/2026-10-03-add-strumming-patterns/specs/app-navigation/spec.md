@@ -1,10 +1,4 @@
-# app-navigation Specification
-
-## Purpose
-
-Lets the player move between Fretwork's practice tools. It makes sure that keyboard shortcuts and sound belong only to the tool on screen.
-
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: Tool switcher
 The system SHALL offer a tool switcher with "1 minute changes", "Strumming" and "Metronome", in that order. When the page opens, 1 minute changes SHALL be shown. The switcher SHALL be available on the 1 minute changes setup and history views, on the metronome whether it is stopped or playing, and on the strumming tool whether it is stopped or playing. It SHALL be hidden while a 1 minute changes session is in its count-in, run, score confirmation or result, and while the strumming pattern editor is open.
@@ -55,21 +49,6 @@ Switching away from the metronome or the strumming tool SHALL stop it, so that n
 - **WHEN** a strumming pattern is playing and the player switches to the metronome
 - **THEN** no further strumming clicks or guide sounds play
 
-### Requirement: Build version in the footer
-The footer SHALL show the version of the running build next to the Privacy link: "v" followed by the release version, then the short commit id of the build when it is known. A development server SHALL show "dev". The version SHALL be fixed when the app is built, and showing it SHALL NOT need any network request.
-
-#### Scenario: Release build
-- **WHEN** version 0.1.0 is built from a git checkout at commit d933a13
-- **THEN** the footer shows "v0.1.0 · d933a13"
-
-#### Scenario: Built without git
-- **WHEN** version 0.1.0 is built from a copy of the source that is not a git checkout
-- **THEN** the footer shows "v0.1.0"
-
-#### Scenario: Development server
-- **WHEN** the app runs on the development server
-- **THEN** the footer shows "dev"
-
 ### Requirement: Home link
 The header SHALL show the logo and wordmark at the upper left, beside the tool switcher, wherever the tool switcher is shown and on the privacy page. Choosing it SHALL show the 1 minute changes setup screen. This applies from the metronome and the strumming tool (which then stop), from the history view and from the privacy page, and 1 minute changes SHALL keep its selected pair. It SHALL be keyboard-operable as a link.
 
@@ -88,14 +67,3 @@ The header SHALL show the logo and wordmark at the upper left, beside the tool s
 #### Scenario: Not during a session
 - **WHEN** a 1 minute changes count-in or run is in progress
 - **THEN** the logo link is not shown
-
-### Requirement: Project link in the footer
-The footer SHALL include a "GitHub" link to the project's source code, next to the Privacy link and the build version. It SHALL open in a new tab without giving the new page access to the app (`noopener`), and SHALL point to the same project URL as the privacy page's questions link.
-
-#### Scenario: Open the project
-- **WHEN** the player chooses "GitHub" in the footer
-- **THEN** the project's repository opens in a new tab and the app stays as it was
-
-#### Scenario: Same link as the privacy page
-- **WHEN** the footer link and the privacy page's GitHub link are compared
-- **THEN** both point to the same URL

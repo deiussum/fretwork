@@ -3,7 +3,7 @@ import { DEFAULT_METRONOME_SETTINGS, type MetronomeSettings } from '../../domain
 import { FakeClock } from '../clock'
 import { RecordingSounds } from '../sounds'
 import { IntervalTicker } from '../ticker'
-import { MetronomeEngine, type VisibilitySource } from './metronome'
+import { MetronomeEngine, type Beat, type BeatListener, type VisibilitySource } from './metronome'
 import { tempoForBar } from './ramp'
 
 class FakeVisibility implements VisibilitySource {
@@ -24,7 +24,7 @@ class FakeVisibility implements VisibilitySource {
 
 const T0 = 100
 
-function setup(settings: Partial<MetronomeSettings> = {}) {
+function setup(settings: Partial<MetronomeSettings> = {}, listener?: BeatListener) {
   const clock = new FakeClock(T0)
   const sounds = new RecordingSounds()
   const visibility = new FakeVisibility()
@@ -34,6 +34,7 @@ function setup(settings: Partial<MetronomeSettings> = {}) {
     ticker: new IntervalTicker(),
     visibility,
     settings: { ...DEFAULT_METRONOME_SETTINGS, ...settings },
+    listener,
   })
   /** Advance the audio clock and the ticker together, one tick at a time. */
   const advance = (seconds: number) => {
@@ -317,4 +318,74 @@ test('beatAt returns the same object while a beat is current', async () => {
   expect(ctx.engine.beatAt(ctx.clock.now())).toBe(beat)
   ctx.advance(0.5)
   expect(ctx.engine.beatAt(ctx.clock.now())).not.toBe(beat)
+})
+
+describe('beat listener', () => {
+  function recordingListener() {
+    const beats: Beat[] = []
+    const rewinds: number[] = []
+    const listener: BeatListener = {
+      beatScheduled: (beat) => beats.push(beat),
+      rewound: (time) => rewinds.push(time),
+    }
+    return { beats, rewinds, listener }
+  }
+
+  test('sees every scheduled beat in order', async () => {
+    const rec = recordingListener()
+    const { engine, advance, times } = setup({ bpm: 120 }, rec.listener)
+    await engine.start()
+    advance(2)
+    expect(rec.beats.map((b) => b.time)).toEqual(times())
+    expect(rec.beats.map((b) => b.beatInBar)).toEqual([0, 1, 2, 3, 0])
+  })
+
+  test('a tempo change rewinds from the first unsounded beat', async () => {
+    const rec = recordingListener()
+    const { engine, advance, visibility } = setup({ bpm: 120 }, rec.listener)
+    await engine.start()
+    visibility.set(true)
+    advance(0.3)
+    const next = rec.beats.find((b) => b.time > T0 + 0.3)!
+    engine.setTempo(100)
+    expect(rec.rewinds).toEqual([next.time])
+    // The rewound beats are announced again under the new tempo.
+    const again = rec.beats.filter((b) => b.time === next.time)
+    expect(again).toHaveLength(2)
+    expect(again[1].bpm).toBe(100)
+  })
+
+  test('stop rewinds from the current time', async () => {
+    const rec = recordingListener()
+    const { engine, advance, clock } = setup({ bpm: 120 }, rec.listener)
+    await engine.start()
+    advance(1)
+    engine.stop()
+    expect(rec.rewinds).toEqual([clock.now()])
+  })
+
+  test('rescheduleUpcoming re-announces unsounded beats, and does nothing while stopped', async () => {
+    const rec = recordingListener()
+    const { engine, advance, sounds, visibility } = setup({ bpm: 120 }, rec.listener)
+    engine.rescheduleUpcoming()
+    expect(rec.rewinds).toEqual([])
+    await engine.start()
+    visibility.set(true)
+    advance(0.4)
+    const before = sounds.scheduled.length
+    engine.rescheduleUpcoming()
+    expect(rec.rewinds).toHaveLength(1)
+    expect(sounds.scheduled.length).toBe(before)
+  })
+
+  test('a muted beat has no click but is still announced and followed', async () => {
+    const rec = recordingListener()
+    const listener: BeatListener = { ...rec.listener, muteClick: (beat) => beat.bar > 0 }
+    const { engine, advance, kinds, clock } = setup({ bpm: 120 }, listener)
+    await engine.start()
+    advance(2.5)
+    expect(kinds()).toEqual(['accent', 'tick', 'tick', 'tick'])
+    expect(rec.beats.filter((b) => b.bar === 1).length).toBeGreaterThan(0)
+    expect(engine.position(clock.now())?.bar).toBe(1)
+  })
 })
