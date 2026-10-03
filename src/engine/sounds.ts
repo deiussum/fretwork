@@ -1,6 +1,16 @@
 import type { SharedAudioContext } from './audioContext'
 
-export type SoundKind = 'click' | 'go' | 'end' | 'tick' | 'accent'
+export type SoundKind =
+  | 'click'
+  | 'go'
+  | 'end'
+  | 'tick'
+  | 'accent'
+  | 'strumDown'
+  | 'strumUp'
+  | 'strumDownAccent'
+  | 'strumUpAccent'
+  | 'chuck'
 
 export interface SoundScheduler {
   /**
@@ -30,6 +40,12 @@ const SOUNDS: Record<SoundKind, { tones: Tone[]; gain: number }> = {
   },
   tick: { tones: [{ freq: 1200, offset: 0, duration: 0.03 }], gain: 0.5 },
   accent: { tones: [{ freq: 1800, offset: 0, duration: 0.04 }], gain: 0.85 },
+  // Strumming guide: up a fourth above down, accents louder and longer, chuck low and short.
+  strumDown: { tones: [{ freq: 660, offset: 0, duration: 0.04 }], gain: 0.45 },
+  strumUp: { tones: [{ freq: 880, offset: 0, duration: 0.04 }], gain: 0.45 },
+  strumDownAccent: { tones: [{ freq: 660, offset: 0, duration: 0.06 }], gain: 0.9 },
+  strumUpAccent: { tones: [{ freq: 880, offset: 0, duration: 0.06 }], gain: 0.9 },
+  chuck: { tones: [{ freq: 220, offset: 0, duration: 0.015 }], gain: 0.7 },
 }
 
 /** Synthesised sounds on the shared AudioContext. */

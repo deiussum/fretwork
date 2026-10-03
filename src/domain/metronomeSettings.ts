@@ -70,25 +70,35 @@ export class LocalStorageMetronomeSettings implements MetronomeSettingsRepositor
 /** Keep valid fields from stored data, falling back to defaults for anything else. */
 function sanitize(value: unknown): MetronomeSettings {
   const v = asRecord(value)
-  const t = asRecord(v.trainer)
   const d = DEFAULT_METRONOME_SETTINGS
-  const whole = (n: unknown, min: number, max: number, fallback: number) =>
-    typeof n === 'number' && Number.isInteger(n) && n >= min && n <= max ? n : fallback
   return {
-    bpm: whole(v.bpm, MIN_BPM, MAX_BPM, d.bpm),
-    beatsPerBar: whole(v.beatsPerBar, MIN_BEATS_PER_BAR, MAX_BEATS_PER_BAR, d.beatsPerBar),
+    bpm: storedWhole(v.bpm, MIN_BPM, MAX_BPM, d.bpm),
+    beatsPerBar: storedWhole(v.beatsPerBar, MIN_BEATS_PER_BAR, MAX_BEATS_PER_BAR, d.beatsPerBar),
     trainerOn: typeof v.trainerOn === 'boolean' ? v.trainerOn : d.trainerOn,
-    // Individual fields are kept even if the combination is invalid (e.g. target
-    // below start); the trainer form reports that rather than silently resetting.
-    trainer: {
-      start: whole(t.start, MIN_BPM, MAX_BPM, d.trainer.start),
-      step: whole(t.step, 1, 50, d.trainer.step),
-      every: whole(t.every, 1, 64, d.trainer.every),
-      target: whole(t.target, MIN_BPM, MAX_BPM, d.trainer.target),
-    },
+    trainer: sanitizeTrainer(v.trainer, d.trainer),
   }
 }
 
-function asRecord(value: unknown): Record<string, unknown> {
+/** A stored whole number within `min`..`max`, or `fallback`. */
+export function storedWhole(n: unknown, min: number, max: number, fallback: number): number {
+  return typeof n === 'number' && Number.isInteger(n) && n >= min && n <= max ? n : fallback
+}
+
+/**
+ * Stored speed trainer settings. Individual fields are kept even if the
+ * combination is invalid (e.g. target below start); the trainer form reports
+ * that rather than silently resetting.
+ */
+export function sanitizeTrainer(value: unknown, fallback: TrainerSettings): TrainerSettings {
+  const t = asRecord(value)
+  return {
+    start: storedWhole(t.start, MIN_BPM, MAX_BPM, fallback.start),
+    step: storedWhole(t.step, 1, 50, fallback.step),
+    every: storedWhole(t.every, 1, 64, fallback.every),
+    target: storedWhole(t.target, MIN_BPM, MAX_BPM, fallback.target),
+  }
+}
+
+export function asRecord(value: unknown): Record<string, unknown> {
   return (typeof value === 'object' && value !== null ? value : {}) as Record<string, unknown>
 }

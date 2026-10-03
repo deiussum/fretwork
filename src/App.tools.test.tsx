@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react'
-import { afterEach, beforeEach, expect, test, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import App from './App'
 import { FakeClock } from './engine/clock'
 import { MetronomeEngine } from './engine/metronome/metronome'
@@ -10,6 +10,7 @@ import { IntervalTicker } from './engine/ticker'
 import { PROJECT_URL } from './project'
 import { fakeInput } from './test/fakeInput'
 import { MemoryHistory } from './test/memoryHistory'
+import { testStrumming } from './test/memoryPatterns'
 
 async function renderApp(operatorConfig?: Promise<{ logRetention?: string }>) {
   const clock = new FakeClock()
@@ -17,9 +18,19 @@ async function renderApp(operatorConfig?: Promise<{ logRetention?: string }>) {
   const engine = new SessionEngine({ clock, sounds: new RecordingSounds(), history })
   const metronome = new MetronomeEngine({ clock, sounds: new RecordingSounds(), ticker: new IntervalTicker() })
   const { input } = fakeInput()
-  render(<App engine={engine} history={history} input={input} metronome={metronome} operatorConfig={operatorConfig} />)
+  const strumming = testStrumming(clock)
+  render(
+    <App
+      engine={engine}
+      history={history}
+      input={input}
+      metronome={metronome}
+      strumming={strumming}
+      operatorConfig={operatorConfig}
+    />,
+  )
   await act(async () => {})
-  return { engine, metronome }
+  return { engine, metronome, strumming: strumming.engine }
 }
 
 async function press(key: string, code = key) {
@@ -217,4 +228,62 @@ test("the footer link matches the privacy page's GitHub link", async () => {
   await choose('Privacy')
   const privacyLink = within(screen.getByRole('main')).getByRole('link', { name: 'GitHub' })
   expect(privacyLink.getAttribute('href')).toBe(footerHref)
+})
+
+describe('strumming tool', () => {
+  test('sits between 1 minute changes and the metronome in the switcher', async () => {
+    await renderApp()
+    const tools = within(screen.getByRole('navigation', { name: 'Tools' }))
+      .getAllByRole('button')
+      .map((b) => b.textContent)
+    expect(tools).toEqual(['1 minute changes', 'Strumming', 'Metronome'])
+  })
+
+  test('opens from the metronome with the selected pattern', async () => {
+    await renderApp()
+    await choose('Metronome')
+    await choose('Strumming')
+    expect(screen.getByRole('heading', { name: 'Strumming' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: /Old faithful/ }).getAttribute('aria-pressed')).toBe('true')
+  })
+
+  test('Space starts the pattern, and neither the metronome nor a session', async () => {
+    const { engine, metronome, strumming } = await renderApp()
+    await choose('Strumming')
+    await press(' ', 'Space')
+    expect(strumming.getState().playing).toBe(true)
+    expect(metronome.getState().playing).toBe(false)
+    expect(engine.getState().kind).toBe('idle')
+  })
+
+  test('switching away stops it', async () => {
+    const { strumming } = await renderApp()
+    await choose('Strumming')
+    await press(' ', 'Space')
+    await choose('Metronome')
+    expect(strumming.getState().playing).toBe(false)
+  })
+
+  test('the home link stops it and shows 1 minute changes', async () => {
+    const { strumming } = await renderApp()
+    await choose('Strumming')
+    await press(' ', 'Space')
+    await act(async () => {
+      fireEvent.click(screen.getByRole('link', { name: 'Fretwork, home' }))
+    })
+    expect(strumming.getState().playing).toBe(false)
+    expect(screen.getByRole('heading', { name: '1 Minute Changes' })).toBeTruthy()
+  })
+
+  test('no tool switcher, home link or footer while editing a pattern', async () => {
+    await renderApp()
+    await choose('Strumming')
+    await choose('New')
+    expect(screen.queryByRole('navigation', { name: 'Tools' })).toBeNull()
+    expect(screen.queryByRole('link', { name: 'Fretwork, home' })).toBeNull()
+    expect(footer()).toBeNull()
+    await press('Escape')
+    expect(screen.getByRole('navigation', { name: 'Tools' })).toBeTruthy()
+    expect(footer()).toBeTruthy()
+  })
 })

@@ -25,6 +25,11 @@ test('covers the microphone, recordings and browser storage', () => {
   expect(screen.getByText(/clear this site's data/)).toBeTruthy()
 })
 
+test('lists the strumming patterns the player made among what is saved', () => {
+  render(<PrivacyView onClose={() => {}} />)
+  expect(screen.getByText('The strumming patterns you made.')).toBeTruthy()
+})
+
 test('Escape and Back close the page', () => {
   const onClose = vi.fn()
   render(<PrivacyView onClose={onClose} />)

@@ -1,21 +1,4 @@
-# privacy Specification
-
-## Purpose
-
-Tells players plainly what Fretwork does with their data, and makes sure the app keeps to it. The app talks only to the site it was loaded from, and the production build enforces that.
-
-## Requirements
-
-### Requirement: Privacy link
-The system SHALL show a footer with a "Privacy" link wherever the tool switcher is shown. It SHALL NOT be shown during a 1 minute changes count-in, run, score confirmation or result, or while the strumming pattern editor is open.
-
-#### Scenario: Footer on setup
-- **WHEN** the 1 minute changes setup screen is shown
-- **THEN** a "Privacy" link is shown in the footer
-
-#### Scenario: No footer mid-session
-- **WHEN** a 1 minute changes count-in or run is in progress
-- **THEN** no footer is shown
+## MODIFIED Requirements
 
 ### Requirement: Privacy page
 Choosing the Privacy link SHALL show a privacy statement in place of the current tool. The statement SHALL cover:
@@ -49,16 +32,16 @@ Choosing the Privacy link SHALL show a privacy statement in place of the current
 - **WHEN** the operator configured the contact "mailto:admin@example.com"
 - **THEN** the statement shows it as a link; a contact of "Ask in the #music channel" is shown as plain text
 
-### Requirement: Leaving the privacy page
-Escape and a Back control on the privacy page SHALL return to the tool that was shown before. 1 minute changes SHALL keep its selected pair and view. While the privacy page is shown, other tools' keyboard shortcuts SHALL NOT apply.
+### Requirement: Privacy link
+The system SHALL show a footer with a "Privacy" link wherever the tool switcher is shown. It SHALL NOT be shown during a 1 minute changes count-in, run, score confirmation or result, or while the strumming pattern editor is open.
 
-#### Scenario: Back to 1 minute changes
-- **WHEN** the player has typed a pair E↔G, opened the privacy page, and presses Escape
-- **THEN** the 1 minute changes setup screen is shown with E↔G selected
+#### Scenario: Footer on setup
+- **WHEN** the 1 minute changes setup screen is shown
+- **THEN** a "Privacy" link is shown in the footer
 
-#### Scenario: Space on the privacy page
-- **WHEN** the privacy page is shown and the player presses Space
-- **THEN** no session or metronome starts
+#### Scenario: No footer mid-session
+- **WHEN** a 1 minute changes count-in or run is in progress
+- **THEN** no footer is shown
 
 ### Requirement: Only the app's own site
 The app SHALL NOT load from, or send data to, any site other than the one it was served from. The production build SHALL enforce this with a Content-Security-Policy that allows the following only from the app's own site, or not at all:
