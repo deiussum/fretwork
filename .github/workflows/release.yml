@@ -5,7 +5,7 @@ on:
     tags: ['v*']
 
 permissions:
-  contents: read
+  contents: write # the release page
   packages: write
 
 jobs:
@@ -58,3 +58,15 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: FRETWORK_COMMIT=${{ github.sha }}
+
+      # Only reached when the image was pushed, so a failed image gets no page.
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+
+      - name: Publish the release page
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: scripts/publish-release.sh "$GITHUB_REF_NAME"
